@@ -1,10 +1,10 @@
 <script lang="ts">
   import { enhance } from "$app/forms"
-  let { data, form } = $props()
+  let { form } = $props()
 
   // Helper function for getting custom attributes
   function getAttributeValue(
-    attributes: any[],
+    attributes: unknown[],
     key: string,
     defaultValue = "",
   ) {
@@ -198,7 +198,7 @@
               <button
                 type="button"
                 class="btn btn-secondary w-full"
-                on:click={() => createDraftOrder()}
+                onclick={() => createDraftOrder()}
               >
                 Create Draft Order
               </button>

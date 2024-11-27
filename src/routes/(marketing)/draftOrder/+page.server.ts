@@ -68,7 +68,7 @@ export const actions = {
     }
 };
 
-function getAttributeValue(attributes: any[], key: string, defaultValue = '') {
+function getAttributeValue(attributes: uknown[], key: string, defaultValue = '') {
     const attribute = attributes.find(attr => attr.key === key);
     return attribute ? attribute.value : defaultValue;
 }

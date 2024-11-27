@@ -2,7 +2,7 @@
 import { executeGraphQLQuery } from '$lib/apiTools/graphQL/graphqlClient';
 import { buildCartCreateMutation, buildGetDepositVariantsQuery } from '$lib/apiTools/shopify/shopifyQueries';
 
-async function addToShopifyCart(formData: any, totalCost: number) {
+async function addToShopifyCart(formData: unknown, totalCost: number) {
     const shopifyStorefrontUrl = 'https://e04ebb-82.myshopify.com/api/2024-01/graphql';
     const storefrontAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_API_KEY;
 
@@ -39,7 +39,7 @@ async function getDepositVariants() {
             ...(response.data.product2?.variants?.edges || []),
             ...(response.data.product3?.variants?.edges || []),
             ...(response.data.product4?.variants?.edges || [])
-        ].map((edge: any) => ({
+        ].map((edge: unkonwn) => ({
             id: edge.node.id,
             price: parseFloat(edge.node.price.amount)
         }));
@@ -76,7 +76,7 @@ async function findClosestDepositVariant(targetPrice: number) {
         let closestPriceDifference = Infinity;
         let closestVariantId = null;
 
-        for (let variant of variants) {
+        for (const variant of variants) {
             const priceDifference = Math.abs(variant.price - targetPrice);
             console.log(`Checking variant: Price ${variant.price}, Difference ${priceDifference}`);
             if (priceDifference < closestPriceDifference) {

@@ -1,6 +1,6 @@
 // src/lib/apiTools/shopify/shopifyQueries.ts
 
-export function buildCartCreateMutation(formData: any, totalCost: number): string {
+export function buildCartCreateMutation(formData: unknown, totalCost: number): string {
     return `
         mutation {
             cartCreate(
