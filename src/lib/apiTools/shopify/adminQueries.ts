@@ -17,6 +17,11 @@ export function buildGetOrderQuery(orderId: string): string {
                   }
               }
           }
+          customer {
+              id
+              displayName
+              email
+          }
           metafields(first: 10, namespace: "custom_book") {
               edges {
                   node {

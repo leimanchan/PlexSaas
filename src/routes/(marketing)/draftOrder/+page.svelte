@@ -80,6 +80,18 @@
             <span class="font-medium">Back Printing:</span>
             {form.formData.backPrinting}
           </p>
+          <p>
+            <span class="font-medium">Customer ID:</span>
+            {form.orderData.customer.id}
+          </p>
+          <p>
+            <span class="font-medium">Customer Name:</span>
+            {form.orderData.customer.displayName}
+          </p>
+          <p>
+            <span class="font-medium">Customer Email:</span>
+            {form.orderData.customer.email}
+          </p>
         </div>
       </div>
 

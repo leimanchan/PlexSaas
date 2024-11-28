@@ -30,21 +30,18 @@ export const actions = {
             const gid = `gid://shopify/Order/${orderId}`;
             const response = await getOrderDetails(gid);
             
-            // Add null checks and logging
             console.log('API Response:', response);
             
             if (!response?.data?.order) {
                 throw new Error('Order data not found');
             }
 
-            // Extract custom attributes with null checks
             const lineItems = response.data.order.lineItems?.edges || [];
             const firstLineItem = lineItems[0]?.node;
             const customAttributes = firstLineItem?.customAttributes || [];
 
             console.log('Custom Attributes:', customAttributes);
 
-            // Return both the order data and updated formData
             return {
                 success: true,
                 orderData: response.data.order,
