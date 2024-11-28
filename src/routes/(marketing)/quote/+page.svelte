@@ -1,9 +1,14 @@
 <script lang="ts">
   import { enhance } from "$app/forms"
   import { writable } from "svelte/store"
+  import { calculateShipping } from "$lib/shipping/shipping-calc"
 
   let { data, form } = $props()
   let apiResponse = writable("")
+  let shippingResult = writable("")
+
+  let zip = ""
+  let weight = 0
 
   async function addToCart() {
     try {
@@ -35,6 +40,11 @@
         console.error("Response Text:", responseText)
       }
     }
+  }
+
+  function handleShippingCalculation() {
+    const result = calculateShipping(zip, weight)
+    shippingResult.set(result)
   }
 </script>
 
@@ -142,6 +152,28 @@
       </select>
     </div>
 
+    <div class="form-group">
+      <label for="zip" class="label">ZIP Code:</label>
+      <input
+        type="text"
+        id="zip"
+        bind:value={zip}
+        required
+        class="input input-bordered"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="weight" class="label">Weight (lbs):</label>
+      <input
+        type="number"
+        id="weight"
+        bind:value={weight}
+        required
+        class="input input-bordered"
+      />
+    </div>
+
     <div class="col-span-1 md:col-span-2">
       <button type="submit" class="btn btn-primary w-full"
         >Calculate Quote</button
@@ -150,6 +182,11 @@
         type="button"
         onclick={addToCart}
         class="btn btn-secondary w-full mt-2">Add to Cart</button
+      >
+      <button
+        type="button"
+        onclick={handleShippingCalculation}
+        class="btn btn-secondary w-full mt-2">Calculate Shipping</button
       >
     </div>
   </form>
@@ -171,6 +208,13 @@
     <div class="alert alert-info mt-4">
       <h3 class="font-bold">API Response</h3>
       <pre>{$apiResponse}</pre>
+    </div>
+  {/if}
+
+  {#if $shippingResult}
+    <div class="alert alert-info mt-4">
+      <h3 class="font-bold">Shipping Calculation Result</h3>
+      <pre>{$shippingResult}</pre>
     </div>
   {/if}
 
