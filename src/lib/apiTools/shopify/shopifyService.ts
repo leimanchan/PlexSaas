@@ -3,7 +3,7 @@ import { executeGraphQLQuery } from '$lib/apiTools/graphQL/graphqlClient';
 import { buildCartCreateMutation, buildGetDepositVariantsQuery } from '$lib/apiTools/shopify/shopifyQueries';
 
 async function addToShopifyCart(formData: unknown, totalCost: number) {
-    const shopifyStorefrontUrl = 'https://e04ebb-82.myshopify.com/api/2024-01/graphql';
+    const shopifyStorefrontUrl = `${import.meta.env.VITE_SHOPIFY_STORE_URL}/api/2024-01/graphql`;
     const storefrontAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_API_KEY;
 
     if (!storefrontAccessToken) {
@@ -16,7 +16,7 @@ async function addToShopifyCart(formData: unknown, totalCost: number) {
 }
 
 async function getDepositVariants() {
-    const shopifyStorefrontUrl = 'https://e04ebb-82.myshopify.com/api/2024-01/graphql';
+    const shopifyStorefrontUrl = `${import.meta.env.VITE_SHOPIFY_STORE_URL}/api/2024-01/graphql`;
     const storefrontAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_API_KEY;
 
     if (!storefrontAccessToken) {

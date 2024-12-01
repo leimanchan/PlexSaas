@@ -7,8 +7,8 @@
   let apiResponse = writable("")
   let shippingResult = writable("")
 
-  let zip = ""
-  let weight = 0
+  let zip = "90038"
+  let weight = 10
 
   async function addToCart() {
     try {
