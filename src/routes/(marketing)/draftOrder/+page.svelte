@@ -2,6 +2,15 @@
   import { enhance } from "$app/forms"
   let { form } = $props()
 
+  // Change const to let since we'll be reassigning the value
+  let originalFormData = $state(null)
+
+  $effect(() => {
+    if (form?.success && form.orderData && !originalFormData) {
+      originalFormData = { ...form.formData }
+    }
+  })
+
   // Helper function for getting custom attributes
   function getAttributeValue(
     attributes: unknown[],
@@ -11,6 +20,29 @@
     if (!Array.isArray(attributes)) return defaultValue
     const attribute = attributes.find((attr) => attr.key === key)
     return attribute ? attribute.value : defaultValue
+  }
+
+  // Add this state variable to control the display
+  let showComparison = $state(false)
+
+  // Client-side handler instead of form submission
+  function handleCompare(e: Event) {
+    e.preventDefault()
+    const formElement = e.target as HTMLFormElement
+    const formData = new FormData(formElement)
+
+    // Update form.formData with the current values
+    form.formData = {
+      quantity: formData.get("quantity"),
+      width: formData.get("width"),
+      height: formData.get("height"),
+      paperType: formData.get("paperType"),
+      paperWeight: formData.get("paperWeight"),
+      frontPrinting: formData.get("frontPrinting"),
+      backPrinting: formData.get("backPrinting"),
+    }
+
+    showComparison = true
   }
 </script>
 
@@ -58,27 +90,27 @@
           </p>
           <p>
             <span class="font-medium">Quantity:</span>
-            {form.formData.quantity}
+            {originalFormData?.quantity}
           </p>
           <p>
             <span class="font-medium">Size:</span>
-            {form.formData.width}" × {form.formData.height}"
+            {originalFormData?.width}" × {originalFormData?.height}"
           </p>
           <p>
             <span class="font-medium">Paper Type:</span>
-            {form.formData.paperType}
+            {originalFormData?.paperType}
           </p>
           <p>
             <span class="font-medium">Paper Weight:</span>
-            {form.formData.paperWeight}
+            {originalFormData?.paperWeight}
           </p>
           <p>
             <span class="font-medium">Front Printing:</span>
-            {form.formData.frontPrinting}
+            {originalFormData?.frontPrinting}
           </p>
           <p>
             <span class="font-medium">Back Printing:</span>
-            {form.formData.backPrinting}
+            {originalFormData?.backPrinting}
           </p>
           <p>
             <span class="font-medium">Customer ID:</span>
@@ -98,12 +130,7 @@
       <!-- Quote Form -->
       <div class="bg-base-100 p-6 rounded-lg shadow">
         <h2 class="text-xl font-semibold mb-4">Calculate New Quote</h2>
-        <form
-          method="POST"
-          action="?/calculateQuote"
-          use:enhance
-          class="space-y-4"
-        >
+        <form on:submit={handleCompare} class="space-y-4">
           <div class="form-control">
             <label class="label" for="quantity">Quantity</label>
             <input
@@ -204,32 +231,36 @@
 
           <div class="space-y-2">
             <button type="submit" class="btn btn-primary w-full">
-              Calculate Quote
+              Compare Changes
             </button>
-            {#if form?.quoteResult}
-              <button
-                type="button"
-                class="btn btn-secondary w-full"
-                onclick={() => createDraftOrder()}
-              >
-                Create Draft Order
-              </button>
-            {/if}
           </div>
         </form>
       </div>
     </div>
 
-    {#if form?.quoteResult}
-      <div class="alert alert-success">
-        <h3 class="font-bold">Quote Results</h3>
-        <p>Total Cost: ${form.quoteResult.totalCost}</p>
-        <p>Sheets Needed: {form.quoteResult.sheetsNeeded}</p>
-        <p>Cost Per Sheet: ${form.quoteResult.costPerSheet}</p>
-        <p>Paper Cost: ${form.quoteResult.paperCost}</p>
-        <p>Printing Cost: ${form.quoteResult.printingCost}</p>
-        <p>Setup Cost: ${form.quoteResult.setupCost}</p>
-        <p>Slots Per Sheet: {form.quoteResult.slotsPerSheet}</p>
+    {#if showComparison}
+      <div class="grid grid-cols-2 gap-8">
+        <!-- Original Data -->
+        <div class="alert alert-info">
+          <h3 class="font-bold">Original Order Data</h3>
+          <p>Quantity: {originalFormData?.quantity}</p>
+          <p>Size: {originalFormData?.width}" × {originalFormData?.height}"</p>
+          <p>Paper Type: {originalFormData?.paperType}</p>
+          <p>Paper Weight: {originalFormData?.paperWeight}</p>
+          <p>Front Printing: {originalFormData?.frontPrinting}</p>
+          <p>Back Printing: {originalFormData?.backPrinting}</p>
+        </div>
+
+        <!-- New Form Data -->
+        <div class="alert alert-success">
+          <h3 class="font-bold">New Form Data</h3>
+          <p>Quantity: {form.formData.quantity}</p>
+          <p>Size: {form.formData.width}" × {form.formData.height}"</p>
+          <p>Paper Type: {form.formData.paperType}</p>
+          <p>Paper Weight: {form.formData.paperWeight}</p>
+          <p>Front Printing: {form.formData.frontPrinting}</p>
+          <p>Back Printing: {form.formData.backPrinting}</p>
+        </div>
       </div>
     {/if}
   {:else if form?.error}
