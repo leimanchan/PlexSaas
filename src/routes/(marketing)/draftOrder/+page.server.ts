@@ -1,4 +1,5 @@
 import { getOrderDetails } from '$lib/apiTools/shopify/adminService';
+import { createDefaultCalculator } from '$lib/quoteEngine/flatPrintingCalculator-v2';
 
 export function load() {
     return {
@@ -62,6 +63,39 @@ export const actions = {
                 error: error.message || 'Failed to fetch order details'
             };
         }
+    },
+
+    calculateQuote: async ({ request }) => {
+        const formData = await request.formData();
+        const calculator = createDefaultCalculator();
+        
+        const quoteData = {
+            quantity: Number(formData.get('quantity')),
+            width: Number(formData.get('width')),
+            height: Number(formData.get('height')),
+            paperType: String(formData.get('paperType')),
+            paperWeight: String(formData.get('paperWeight')),
+            frontPrinting: { method: String(formData.get('frontPrinting')) },
+            backPrinting: { method: String(formData.get('backPrinting')) }
+        };
+
+        console.log('Quote Data:', quoteData);
+        const result = calculator.calculatePrice(quoteData);
+        console.log('Quote Result:', result);
+
+        return {
+            success: true,
+            result,
+            formData: {
+                quantity: quoteData.quantity,
+                width: quoteData.width,
+                height: quoteData.height,
+                paperType: quoteData.paperType,
+                paperWeight: quoteData.paperWeight,
+                frontPrinting: quoteData.frontPrinting.method,
+                backPrinting: quoteData.backPrinting.method
+            }
+        };
     }
 };
 
