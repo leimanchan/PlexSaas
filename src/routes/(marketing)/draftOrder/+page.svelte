@@ -2,8 +2,18 @@
   import { enhance } from "$app/forms"
   let { form } = $props()
 
-  // Change const to let since we'll be reassigning the value
+  // Initialize state variables with proper structure
   let originalFormData = $state(null)
+  let quoteResult = $state(null)
+  let newFormData = $state({
+    quantity: "",
+    width: "",
+    height: "",
+    paperType: "",
+    paperWeight: "",
+    frontPrinting: { method: "" },
+    backPrinting: { method: "" },
+  })
 
   $effect(() => {
     if (form?.success && form.orderData && !originalFormData) {
@@ -37,41 +47,49 @@
         body: formData,
       })
       const data = await response.json()
-      console.log("Response data:", data) // Debug log
+      console.log("Response data:", data)
 
       if (data.success) {
-        console.log("Before form update:", form) // Debug log
-
-        // Try updating form this way instead
-        form = {
-          ...form,
-          success: true,
-          formData: {
-            quantity: formData.get("quantity"),
-            width: formData.get("width"),
-            height: formData.get("height"),
-            paperType: formData.get("paperType"),
-            paperWeight: formData.get("paperWeight"),
-            frontPrinting: formData.get("frontPrinting"),
-            backPrinting: formData.get("backPrinting"),
-          },
-          quoteResult: data.result,
+        // Update newFormData with proper structure
+        newFormData = {
+          quantity: formData.get("quantity"),
+          width: formData.get("width"),
+          height: formData.get("height"),
+          paperType: formData.get("paperType"),
+          paperWeight: formData.get("paperWeight"),
+          frontPrinting: { method: formData.get("frontPrinting") },
+          backPrinting: { method: formData.get("backPrinting") },
         }
 
-        console.log("After form update:", form) // Debug log
-        console.log("Show comparison:", showComparison) // Debug log
+        // Force a new object creation for reactivity
+        quoteResult = {
+          totalCost: data.result.totalCost,
+          sheetsNeeded: data.result.sheetsNeeded,
+          costPerSheet: data.result.costPerSheet,
+          paperCost: data.result.paperCost,
+          printingCost: data.result.printingCost,
+          frontPrintingCost: data.result.frontPrintingCost,
+          backPrintingCost: data.result.backPrintingCost,
+          setupCost: data.result.setupCost,
+          slotsPerSheet: data.result.slotsPerSheet,
+        }
 
-        showComparison = true
+        console.log("Updated state:", {
+          newFormData,
+          quoteResult,
+        })
       }
     } catch (error) {
       console.error("Error calculating quote:", error)
     }
   }
 
-  // Add a reactive statement to debug form updates
+  // Debug effect to monitor state changes
   $effect(() => {
-    console.log("Form changed:", form)
-    console.log("Show comparison status:", showComparison)
+    console.log("State changed:", {
+      newFormData,
+      quoteResult,
+    })
   })
 </script>
 
@@ -159,7 +177,19 @@
       <!-- Quote Form -->
       <div class="bg-base-100 p-6 rounded-lg shadow">
         <h2 class="text-xl font-semibold mb-4">Calculate New Quote</h2>
-        <form on:submit={handleCompare} class="space-y-4">
+        <form
+          method="POST"
+          action="?/calculateQuote"
+          use:enhance={() => {
+            return async ({ result }) => {
+              if (result.type === "success") {
+                newFormData = result.data.formData
+                quoteResult = result.data.result
+              }
+            }
+          }}
+          class="space-y-4"
+        >
           <div class="form-control">
             <label class="label" for="quantity">Quantity</label>
             <input
@@ -266,76 +296,81 @@
         </form>
       </div>
     </div>
+  {/if}
 
-    {#if showComparison}
-      <div class="grid grid-cols-2 gap-8 mt-8">
-        <!-- Debug Section -->
-        <div class="col-span-2 mb-4 p-4 bg-base-200 rounded">
-          <h3 class="font-bold mb-2">Debug Data:</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <h4 class="font-semibold">Quote Data:</h4>
-              <pre class="text-sm whitespace-pre-wrap bg-base-300 p-2 rounded">
-                {JSON.stringify(newFormData, null, 2)}
-              </pre>
-            </div>
-            <div>
-              <h4 class="font-semibold">Quote Result:</h4>
-              <pre class="text-sm whitespace-pre-wrap bg-base-300 p-2 rounded">
-                {JSON.stringify(quoteResult, null, 2)}
-              </pre>
-            </div>
-          </div>
+  <div class="grid grid-cols-2 gap-8 mt-8">
+    <!-- Debug Section -->
+    <div class="col-span-2 mb-4 p-4 bg-base-200 rounded">
+      <h3 class="font-bold mb-2">Debug Data:</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <h4 class="font-semibold">Quote Data:</h4>
+          <pre class="text-sm whitespace-pre-wrap bg-base-300 p-2 rounded">
+            {JSON.stringify(newFormData, null, 2) || "No form data yet"}
+          </pre>
         </div>
+        <div>
+          <h4 class="font-semibold">Quote Result:</h4>
+          <pre class="text-sm whitespace-pre-wrap bg-base-300 p-2 rounded">
+            {JSON.stringify(quoteResult, null, 2) || "No quote result yet"}
+          </pre>
+        </div>
+      </div>
+      <div class="mt-4">
+        <h4 class="font-semibold">Raw State:</h4>
+        <pre class="text-sm whitespace-pre-wrap bg-base-300 p-2 rounded">
+          newFormData: {newFormData ? "exists" : "null"}
+          quoteResult: {quoteResult ? "exists" : "null"}
+        </pre>
+      </div>
+    </div>
 
-        <!-- Original Data -->
-        <div class="alert alert-info">
-          <h3 class="font-bold">Original Order Data</h3>
-          <p>Quantity: {originalFormData?.quantity || ""}</p>
-          <p>
-            Size: {originalFormData?.width || ""}" × {originalFormData?.height ||
-              ""}"
+    <!-- Original Data -->
+    <div class="alert alert-info">
+      <h3 class="font-bold">Original Order Data</h3>
+      <p>Quantity: {originalFormData?.quantity || ""}</p>
+      <p>
+        Size: {originalFormData?.width || ""}" × {originalFormData?.height ||
+          ""}"
+      </p>
+      <p>Paper Type: {originalFormData?.paperType || ""}</p>
+      <p>Paper Weight: {originalFormData?.paperWeight || ""}</p>
+      <p>Front Printing: {originalFormData?.frontPrinting || ""}</p>
+      <p>Back Printing: {originalFormData?.backPrinting || ""}</p>
+    </div>
+
+    <!-- New Quote Data -->
+    <div class="alert alert-success">
+      <h3 class="font-bold">New Quote</h3>
+      <div class="space-y-2">
+        <p>Quantity: {newFormData?.quantity || ""}</p>
+        <p>Size: {newFormData?.width || ""}" × {newFormData?.height || ""}"</p>
+        <p>Paper Type: {newFormData?.paperType || ""}</p>
+        <p>Paper Weight: {newFormData?.paperWeight || ""}</p>
+        <p>Front Printing: {newFormData?.frontPrinting || ""}</p>
+        <p>Back Printing: {newFormData?.backPrinting || ""}</p>
+
+        <div class="mt-4 border-t pt-4">
+          <h4 class="font-bold">Quote Details:</h4>
+          <p class="text-lg font-bold">
+            Total Cost: ${quoteResult?.totalCost || "0.00"}
           </p>
-          <p>Paper Type: {originalFormData?.paperType || ""}</p>
-          <p>Paper Weight: {originalFormData?.paperWeight || ""}</p>
-          <p>Front Printing: {originalFormData?.frontPrinting || ""}</p>
-          <p>Back Printing: {originalFormData?.backPrinting || ""}</p>
-        </div>
-
-        <!-- New Quote Data -->
-        <div class="alert alert-success">
-          <h3 class="font-bold">New Quote</h3>
-          <div class="space-y-2">
-            <p>Quantity: {newFormData?.quantity || ""}</p>
+          <div class="text-sm mt-2 space-y-1">
+            <p>Sheets Needed: {quoteResult?.sheetsNeeded || "0"}</p>
+            <p>Cost Per Sheet: ${quoteResult?.costPerSheet || "0.00"}</p>
+            <p>Paper Cost: ${quoteResult?.paperCost || "0.00"}</p>
+            <p>Printing Cost: ${quoteResult?.printingCost || "0.00"}</p>
             <p>
-              Size: {newFormData?.width || ""}" × {newFormData?.height || ""}"
+              Front Printing Cost: ${quoteResult?.frontPrintingCost || "0.00"}
             </p>
-            <p>Paper Type: {newFormData?.paperType || ""}</p>
-            <p>Paper Weight: {newFormData?.paperWeight || ""}</p>
-            <p>Front Printing: {newFormData?.frontPrinting || ""}</p>
-            <p>Back Printing: {newFormData?.backPrinting || ""}</p>
-
-            <div class="mt-4 border-t pt-4">
-              <h4 class="font-bold">Quote Details:</h4>
-              <p class="text-lg font-bold">
-                Total Cost: ${quoteResult?.totalCost || "0.00"}
-              </p>
-              <div class="text-sm mt-2 space-y-1">
-                <p>Sheets Needed: {quoteResult?.sheetsNeeded || "0"}</p>
-                <p>Cost Per Sheet: ${quoteResult?.costPerSheet || "0.00"}</p>
-                <p>Paper Cost: ${quoteResult?.paperCost || "0.00"}</p>
-                <p>Printing Cost: ${quoteResult?.printingCost || "0.00"}</p>
-                <p>Setup Cost: ${quoteResult?.setupCost || "0.00"}</p>
-                <p>Slots Per Sheet: {quoteResult?.slotsPerSheet || "0"}</p>
-              </div>
-            </div>
+            <p>
+              Back Printing Cost: ${quoteResult?.backPrintingCost || "0.00"}
+            </p>
+            <p>Setup Cost: ${quoteResult?.setupCost || "0.00"}</p>
+            <p>Slots Per Sheet: {quoteResult?.slotsPerSheet || "0"}</p>
           </div>
         </div>
       </div>
-    {/if}
-  {:else if form?.error}
-    <div class="alert alert-error">
-      <p>{form.error}</p>
     </div>
-  {/if}
+  </div>
 </div>
