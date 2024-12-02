@@ -1,5 +1,6 @@
 <script lang="ts">
   import { enhance } from "$app/forms"
+  import { createDraftOrder } from "$lib/apiTools/shopify/adminService"
   let { form } = $props()
 
   // Initialize state variables with proper structure
@@ -116,7 +117,7 @@
       <!-- Original Order Details -->
       <div class="bg-base-200 p-6 rounded-lg shadow">
         <h2 class="text-xl font-semibold mb-4">
-          Original Order #{form.orderData.name}
+          Original Order {form.orderData.name}
         </h2>
         <div class="space-y-2">
           <p>
@@ -124,7 +125,7 @@
             {new Date(form.orderData.createdAt).toLocaleDateString()}
           </p>
           <p>
-            <span class="font-medium">Total Cost:</span>
+            <span class="font-medium">Original Estimated Total Cost:</span>
             {getAttributeValue(
               form.orderData.lineItems.edges[0].node.customAttributes,
               "Expected production cost (not including tax or shipping):",
@@ -355,20 +356,66 @@
           <p class="text-lg font-bold">
             Total Cost: ${quoteResult?.totalCost || "0.00"}
           </p>
+          {#if form?.orderData?.lineItems?.edges[0]?.node?.originalUnitPrice}
+            <p class="text-lg font-bold text-primary">
+              Original Deposit: ${form.orderData.lineItems.edges[0].node
+                .originalUnitPrice}
+            </p>
+            <p class="text-lg font-bold">
+              Remaining Balance: ${(
+                quoteResult?.totalCost -
+                form.orderData.lineItems.edges[0].node.originalUnitPrice
+              ).toFixed(2) || "0.00"}
+            </p>
+          {/if}
           <div class="text-sm mt-2 space-y-1">
             <p>Sheets Needed: {quoteResult?.sheetsNeeded || "0"}</p>
             <p>Cost Per Sheet: ${quoteResult?.costPerSheet || "0.00"}</p>
             <p>Paper Cost: ${quoteResult?.paperCost || "0.00"}</p>
             <p>Printing Cost: ${quoteResult?.printingCost || "0.00"}</p>
-            <p>
-              Front Printing Cost: ${quoteResult?.frontPrintingCost || "0.00"}
-            </p>
-            <p>
-              Back Printing Cost: ${quoteResult?.backPrintingCost || "0.00"}
-            </p>
             <p>Setup Cost: ${quoteResult?.setupCost || "0.00"}</p>
             <p>Slots Per Sheet: {quoteResult?.slotsPerSheet || "0"}</p>
           </div>
+          {#if quoteResult && form?.orderData}
+            <button
+              class="btn btn-primary mt-4"
+              on:click={async () => {
+                try {
+                  const remainingBalance =
+                    quoteResult.totalCost -
+                    form.orderData.lineItems.edges[0].node.originalUnitPrice
+                  const payload = {
+                    customerId: form.orderData.customer.id,
+                    remainingBalance,
+                    formData: newFormData,
+                    originalOrderData: form.orderData,
+                  }
+
+                  console.log("Sending payload:", payload)
+
+                  const response = await fetch("/draftOrder/createDraftOrder", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload),
+                  })
+
+                  if (!response.ok) {
+                    const errorData = await response.json()
+                    throw new Error(JSON.stringify(errorData))
+                  }
+
+                  const result = await response.json()
+                  console.log("Draft order created:", result)
+                } catch (error) {
+                  console.error("Error creating draft order:", error)
+                }
+              }}
+            >
+              Create Draft Order
+            </button>
+          {/if}
         </div>
       </div>
     </div>

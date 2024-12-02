@@ -1,35 +1,49 @@
 // src/lib/apiTools/graphQL/graphqlClient.ts
 export async function executeGraphQLQuery(
-    url: string, 
-    accessToken: string, 
+    url: string,
+    accessToken: string,
     query: string,
-    isAdminAPI: boolean = false
+    isAdmin = false,
+    variables?: Record<string, unknown>
 ) {
-    // Set up headers based on API type
-    const headers = isAdminAPI ? {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': accessToken
-    } : {
-        'Content-Type': 'application/json',
-        'X-Shopify-Storefront-Access-Token': accessToken
-    };
+    try {
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            ...(isAdmin 
+                ? { 'X-Shopify-Access-Token': accessToken }
+                : { 'X-Shopify-Storefront-Access-Token': accessToken }
+            )
+        };
 
-    const response = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ query })
-    });
+        // Create the request body exactly like the CURL example
+        const requestBody = {
+            query,
+            variables
+        };
 
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.log('Final request:', {
+            url,
+            headers,
+            body: JSON.stringify(requestBody, null, 2)
+        });
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(requestBody)
+        });
+
+        const data = await response.json();
+
+        if (data.errors) {
+            console.error('GraphQL Response Errors:', JSON.stringify(data.errors, null, 2));
+            throw new Error(JSON.stringify(data.errors));
+        }
+
+        return data;
+    } catch (error) {
+        console.error('GraphQL query error:', error);
+        throw error;
     }
-
-    const data = await response.json();
-    
-    if (data.errors) {
-        throw new Error(JSON.stringify({ errors: data.errors }));
-    }
-
-    return data;
 }
  
