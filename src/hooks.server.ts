@@ -56,7 +56,7 @@ export const supabase: Handle = async ({ event, resolve }) => {
       data: { session },
     } = await event.locals.supabase.auth.getSession()
     if (!session) {
-      return { session: null, user: null, amr: null }
+      return { session: null, user: null, amr: null, role: null }
     }
 
     const {
@@ -64,17 +64,30 @@ export const supabase: Handle = async ({ event, resolve }) => {
       error: userError,
     } = await event.locals.supabase.auth.getUser()
     if (userError) {
-      // JWT validation has failed
-      return { session: null, user: null, amr: null }
+      return { session: null, user: null, amr: null, role: null }
     }
 
     const { data: aal, error: amrError } =
       await event.locals.supabase.auth.mfa.getAuthenticatorAssuranceLevel()
     if (amrError) {
-      return { session, user, amr: null }
+      return { session, user, amr: null, role: null }
     }
 
-    return { session, user, amr: aal.currentAuthenticationMethods }
+    // Query the profiles table to get the role
+    const { data: profile, error: profileError } = await event.locals.supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError) {
+      console.error('Error fetching profile:', profileError)
+      return { session, user, amr: aal.currentAuthenticationMethods, role: null }
+    }
+
+    const role = profile.role || null
+
+    return { session, user, amr: aal.currentAuthenticationMethods, role }
   }
 
   return resolve(event, {
@@ -87,9 +100,10 @@ export const supabase: Handle = async ({ event, resolve }) => {
 // Not called for prerendered marketing pages so generally okay to call on ever server request
 // Next-page CSR will mean relatively minimal calls to this hook
 const authGuard: Handle = async ({ event, resolve }) => {
-  const { session, user } = await event.locals.safeGetSession()
+  const { session, user, role } = await event.locals.safeGetSession()
   event.locals.session = session
   event.locals.user = user
+  event.locals.role = role
 
   return resolve(event)
 }
