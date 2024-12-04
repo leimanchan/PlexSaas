@@ -1,10 +1,6 @@
 <script lang="ts">
   import { WebsiteName } from "./../../config"
   import "../../app.css"
-  import { page } from "$app/stores"
-
-  // Access user data from the page store
-  const user = $page.data.user
 
   interface Props {
     children?: import("svelte").Snippet
@@ -29,13 +25,7 @@
       <li class="md:mx-2"><a href="/quote">Quote</a></li>
       <li class="md:mx-2"><a href="/draftOrder">Draft Order</a></li>
       <li class="md:mx-2"><a href="/pricing">Pricing</a></li>
-      <li class="md:mx-2">
-        {#if user}
-          <a href="/account">Account</a>
-        {:else}
-          <a href="/login">Login</a>
-        {/if}
-      </li>
+      <li class="md:mx-2"><a href="/account">Account</a></li>
       <li class="md:mx-0">
         <a href="/search" aria-label="Search">
           <svg

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { enhance } from "$app/forms"
-  import { createDraftOrder } from "$lib/apiTools/shopify/adminService"
   let { form } = $props()
 
   // Initialize state variables with proper structure
@@ -393,13 +392,16 @@
 
                   console.log("Sending payload:", payload)
 
-                  const response = await fetch("/draftOrder/createDraftOrder", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
+                  const response = await fetch(
+                    "/draftOrder/api/createDraftOrder",
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(payload),
                     },
-                    body: JSON.stringify(payload),
-                  })
+                  )
 
                   if (!response.ok) {
                     const errorData = await response.json()
