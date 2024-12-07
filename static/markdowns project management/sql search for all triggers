@@ -1,0 +1,91 @@
+WITH schema_info AS (
+    SELECT 
+        table_name,
+        column_name,
+        data_type,
+        is_nullable,
+        column_default,
+        ordinal_position
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+),
+constraint_info AS (
+    SELECT 
+        conname AS constraint_name,
+        conrelid::regclass AS table_name,
+        pg_get_constraintdef(oid) AS definition,
+        contype AS constraint_type,
+        CASE 
+            WHEN contype = 'f' THEN 
+                (SELECT relname::text FROM pg_class WHERE oid = confrelid)
+            ELSE NULL
+        END AS referenced_table
+    FROM pg_constraint
+    WHERE connamespace = 'public'::regnamespace
+),
+index_info AS (
+    SELECT 
+        schemaname,
+        tablename,
+        indexname,
+        indexdef
+    FROM pg_indexes
+    WHERE schemaname = 'public'
+)
+SELECT * FROM (
+    SELECT 
+        'SCHEMA' as type,
+        s.table_name,
+        s.column_name,
+        s.data_type,
+        s.is_nullable,
+        s.column_default,
+        s.ordinal_position,
+        COALESCE(s.ordinal_position, 0) as sort_position,
+        NULL as constraint_name,
+        NULL as constraint_type,
+        NULL as constraint_definition,
+        NULL as referenced_table,
+        NULL as index_name,
+        NULL as index_definition
+    FROM schema_info s
+    UNION ALL
+    SELECT 
+        'CONSTRAINT' as type,
+        c.table_name::text,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0 as sort_position,
+        c.constraint_name,
+        c.constraint_type,
+        c.definition,
+        c.referenced_table,
+        NULL,
+        NULL
+    FROM constraint_info c
+    UNION ALL
+    SELECT 
+        'INDEX' as type,
+        i.tablename,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        0 as sort_position,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        i.indexname,
+        i.indexdef
+    FROM index_info i
+) subquery
+ORDER BY 
+    type,
+    table_name,
+    sort_position,
+    column_name;

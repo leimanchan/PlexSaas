@@ -1,0 +1,1 @@
+SELECT * FROM find_similar_tags_trgm('NewTag', 0.1);
