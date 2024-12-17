@@ -12,7 +12,8 @@
 
   let messages = $state([])
   let inputMessage = $state("")
-  let chatContainer = $state(null)
+  let chatContainer
+  let selectedImage = $state(null)
 
   $effect(() => {
     if (chatContainer && messages.length) {
@@ -58,14 +59,35 @@
   }
 
   async function handleChatSubmit() {
-    if (!inputMessage.trim()) return
+    if (!inputMessage.trim() && !selectedImage) return
+
+    console.log("Submitting chat with image:", !!selectedImage)
 
     const userMessage = inputMessage
-    messages = [...messages, { text: userMessage, isUser: true }]
+    messages = [
+      ...messages,
+      {
+        text: selectedImage
+          ? `<div>${userMessage}<br><img src="${selectedImage}" class="max-w-xs rounded-lg mt-2" /></div>`
+          : userMessage,
+        isUser: true,
+      },
+    ]
     inputMessage = ""
+    const imageToSend = selectedImage
+    selectedImage = null
 
     try {
       messages = [...messages, { text: "Thinking...", isUser: false }]
+
+      console.log("Sending request with payload:", {
+        message: userMessage,
+        hasImage: !!imageToSend,
+        quoteData: {
+          formData: data.formData,
+          quoteResult: form?.result,
+        },
+      })
 
       const response = await fetch("/quoteChat/api/chatGPT", {
         method: "POST",
@@ -74,6 +96,7 @@
         },
         body: JSON.stringify({
           message: userMessage,
+          image: imageToSend,
           quoteData: {
             formData: data.formData,
             quoteResult: form?.result,
@@ -100,6 +123,25 @@
           isUser: false,
         },
       ]
+    }
+  }
+
+  async function handleImageUpload(event: Event) {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+
+    if (file) {
+      console.log("File selected:", file.name, file.type)
+
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        selectedImage = e.target?.result as string
+        console.log(
+          "Image converted to base64:",
+          selectedImage?.substring(0, 50) + "...",
+        )
+      }
+      reader.readAsDataURL(file)
     }
   }
 </script>
@@ -313,25 +355,76 @@
         e.preventDefault()
         handleChatSubmit()
       }}
-      class="flex gap-2"
+      class="flex flex-col gap-2"
     >
-      <input
-        type="text"
-        bind:value={inputMessage}
-        placeholder="Ask about your quote..."
-        class="input input-bordered flex-1"
-      />
-      <button
-        type="submit"
-        class="btn btn-primary"
-        disabled={!inputMessage.trim()}
-      >
-        Send
-      </button>
+      <div class="flex gap-2">
+        <input
+          type="text"
+          bind:value={inputMessage}
+          placeholder="Ask about your quote..."
+          class="input input-bordered flex-1"
+        />
+
+        <!-- Add image upload button -->
+        <label class="btn btn-circle btn-ghost">
+          <input
+            type="file"
+            accept="image/*"
+            onchange={handleImageUpload}
+            class="hidden"
+          />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-6 h-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+            />
+          </svg>
+        </label>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          disabled={!inputMessage.trim() && !selectedImage}
+        >
+          Send
+        </button>
+      </div>
+
+      <!-- Preview selected image -->
+      {#if selectedImage}
+        <div class="relative inline-block mt-2">
+          <img src={selectedImage} alt="Selected" class="max-h-32 rounded-lg" />
+          <button
+            type="button"
+            class="absolute top-1 right-1 btn btn-circle btn-xs btn-error"
+            onclick={() => (selectedImage = null)}
+          >
+            ×
+          </button>
+        </div>
+      {/if}
     </form>
   </div>
 </div>
 
 <style>
   /* Additional custom styles if needed */
+  input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
 </style>

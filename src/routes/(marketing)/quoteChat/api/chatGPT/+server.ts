@@ -4,14 +4,14 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request }) => {
     try {
-        const { message, quoteData } = await request.json();
+        const { message, image, quoteData } = await request.json();
 
         // Debug logging
-        console.log('Environment check:', {
-            apiKeyExists: !!env.OPENAI_API_KEY,
-            apiKeyLength: env.OPENAI_API_KEY?.length,
-            message,
-            quoteData
+        console.log('Received request:', {
+            hasMessage: !!message,
+            hasImage: !!image,
+            imagePreview: image ? image.substring(0, 50) + '...' : null,
+            hasQuoteData: !!quoteData
         });
 
         // Validate API key
@@ -20,7 +20,7 @@ export const POST: RequestHandler = async ({ request }) => {
         }
 
         const payload = {
-            model: 'gpt-4o-mini', // Changed to 3.5-turbo for testing
+            model: 'gpt-4-turbo', // Changed to 3.5-turbo for testing
             messages: [
                 {
                     role: 'system',
@@ -33,14 +33,32 @@ export const POST: RequestHandler = async ({ request }) => {
                 },
                 {
                     role: 'user',
-                    content: `Quote details: ${JSON.stringify(quoteData)}. Customer message: ${message}`
+                    content: [
+                        {
+                            type: 'text',
+                            text: `Quote details: ${JSON.stringify(quoteData)}.\nCustomer message: ${message}`
+                        },
+                        image ? {
+                            type: 'image_url',
+                            image_url: {
+                                url: image,
+                                detail: 'auto'  // Let GPT decide the detail level
+                            }
+                        } : null
+                    ].filter(Boolean)  // Remove null if no image
                 }
             ],
+            max_tokens: 500,
             temperature: 0.7
         };
 
         // Debug logging
-        console.log('Request payload:', JSON.stringify(payload, null, 2));
+        console.log('Sending payload to OpenAI:', {
+            model: payload.model,
+            messageCount: payload.messages.length,
+            hasImage: !!image,
+            contentTypes: payload.messages[1].content.map(c => c.type)
+        });
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
@@ -62,7 +80,6 @@ export const POST: RequestHandler = async ({ request }) => {
         }
 
         const result = await response.json();
-        // Process the response to preserve newlines and formatting
         const formattedResponse = result.choices[0].message.content
             .replace(/\n/g, '<br>')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -72,13 +89,7 @@ export const POST: RequestHandler = async ({ request }) => {
         return json({ response: formattedResponse });
 
     } catch (error) {
-        console.error('Detailed error:', {
-            name: error.name,
-            message: error.message,
-            stack: error.stack,
-            cause: error.cause
-        });
-
+        console.error('Error processing request:', error);
         return json(
             { 
                 error: 'Failed to process request',
