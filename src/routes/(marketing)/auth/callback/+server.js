@@ -4,24 +4,24 @@ import { isAuthApiError } from "@supabase/supabase-js"
 
 export const GET = async ({ url, locals: { supabase } }) => {
   const code = url.searchParams.get("code")
-  if (code) {
-    try {
-      await supabase.auth.exchangeCodeForSession(code)
-    } catch (error) {
-      // If you open in another browser, need to redirect to login.
-      // Should not display error
-      if (isAuthApiError(error)) {
-        redirect(303, "/login/sign_in?verified=true")
-      } else {
-        throw error
-      }
+  
+  if (!code) {
+    throw redirect(303, "/login/sign_in")
+  }
+
+  try {
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) throw error
+
+    // Successfully authenticated, now redirect
+    const next = url.searchParams.get("next")
+    return redirect(303, next || "/account")
+
+  } catch (error) {
+    console.error("Auth callback error:", error)
+    if (isAuthApiError(error)) {
+      return redirect(303, "/login/sign_in?verified=true")
     }
+    throw error
   }
-
-  const next = url.searchParams.get("next")
-  if (next) {
-    redirect(303, next)
-  }
-
-  redirect(303, "/account")
-}
+} 
