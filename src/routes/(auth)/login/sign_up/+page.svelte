@@ -3,6 +3,9 @@
   import { sharedAppearance, oauthProviders } from "../login_config"
 
   let { data } = $props()
+
+  // Ensure we have a complete URL for the redirect
+  const redirectUrl = new URL("/auth/callback", data.url).toString()
 </script>
 
 <svelte:head>
@@ -13,7 +16,7 @@
 <Auth
   supabaseClient={data.supabase}
   view="sign_up"
-  redirectTo={`${data.url}/auth/callback`}
+  redirectTo={redirectUrl}
   showLinks={false}
   providers={oauthProviders}
   socialLayout="horizontal"
