@@ -159,18 +159,6 @@
             <span class="font-medium">Back Printing:</span>
             {originalFormData?.backPrinting}
           </p>
-          <p>
-            <span class="font-medium">Customer ID:</span>
-            {form.orderData.customer.id}
-          </p>
-          <p>
-            <span class="font-medium">Customer Name:</span>
-            {form.orderData.customer.displayName}
-          </p>
-          <p>
-            <span class="font-medium">Customer Email:</span>
-            {form.orderData.customer.email}
-          </p>
         </div>
       </div>
 
@@ -384,7 +372,6 @@
                     quoteResult.totalCost -
                     form.orderData.lineItems.edges[0].node.originalUnitPrice
                   const payload = {
-                    customerId: form.orderData.customer.id,
                     remainingBalance,
                     formData: newFormData,
                     originalOrderData: form.orderData,

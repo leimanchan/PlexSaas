@@ -1,4 +1,4 @@
-import { addToShopifyCart, findClosestDepositVariant } from '$lib/apiTools/shopify/shopifyService';
+    import { addToShopifyCart, findClosestDepositVariant } from '$lib/components/shared/apiTools/shopify/shopifyService';
 
 // Handle GET requests
 export async function GET() {
@@ -27,6 +27,7 @@ export async function POST({ request }) {
             variantPrice: variant.price
         });
 
+        // Update the addToShopifyCart call to include any necessary headers or options
         const data = await addToShopifyCart(updatedFormData, totalCost);
 
         return new Response(JSON.stringify(data), { 

@@ -1,6 +1,6 @@
 // src/lib/apiTools/shopify/shopifyService.ts
-import { executeGraphQLQuery } from '$lib/apiTools/graphQL/graphqlClient';
-import { buildCartCreateMutation, buildGetDepositVariantsQuery } from '$lib/apiTools/shopify/shopifyQueries';
+import { executeGraphQLQuery } from '$lib/components/shared/apiTools/graphQL/graphqlClient';
+import { buildCartCreateMutation, buildGetDepositVariantsQuery } from '$lib/components/shared/apiTools/shopify/shopifyQueries';
 
 async function addToShopifyCart(formData: unknown, totalCost: number) {
     const shopifyStorefrontUrl = `${import.meta.env.VITE_SHOPIFY_STORE_URL}/api/2024-01/graphql`;

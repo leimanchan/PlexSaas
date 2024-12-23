@@ -17,11 +17,7 @@ export function buildGetOrderQuery(orderId: string): string {
                   }
               }
           }
-          customer {
-              id
-              displayName
-              email
-          }
+
           metafields(first: 10, namespace: "custom_book") {
               edges {
                   node {
@@ -87,10 +83,6 @@ export const DRAFT_ORDER_CREATE_MUTATION = `
               }
             }
           }
-        }
-        customer {
-          id
-          email
         }
       }
       userErrors {

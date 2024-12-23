@@ -1,5 +1,5 @@
-import { executeGraphQLQuery } from '$lib/apiTools/graphQL/graphqlClient';
-import { buildGetOrderQuery, DRAFT_ORDER_CREATE_MUTATION } from '$lib/apiTools/shopify/adminQueries';
+import { executeGraphQLQuery } from '$lib/components/shared/apiTools/graphQL/graphqlClient';
+import { buildGetOrderQuery, DRAFT_ORDER_CREATE_MUTATION } from '$lib/components/admin/api/shopify/adminQueries';
 
 const SHOPIFY_ADMIN_URL = 'https://e04ebb-82.myshopify.com/admin/api/2024-01/graphql.json';
 const ADMIN_ACCESS_TOKEN = import.meta.env.VITE_SHOPIFY_ADMIN_API_KEY;
@@ -24,7 +24,6 @@ export async function getOrderDetails(orderId: string) {
 }
 
 export async function createDraftOrder(
-  customerId: string, 
   remainingBalance: number,
   formData: any,
   originalOrderData: any
@@ -36,7 +35,34 @@ export async function createDraftOrder(
   const safeSize = `${formData.width}" x ${formData.height}"`;
   const safeTitle = `Balance Payment for Order ${originalOrderData.name}`.replace(/[^\w\s-]/g, '');
 
-  const mutation = 'mutation draftOrderCreate($input: DraftOrderInput!) {\r\n  draftOrderCreate(input: $input) {\r\n    draftOrder {\r\n      id\r\n      lineItems(first: 10) {\r\n        edges {\r\n          node {\r\n            title\r\n            quantity\r\n            originalUnitPrice\r\n            weight {\r\n              value\r\n              unit\r\n            }\r\n            customAttributes {\r\n              key\r\n              value\r\n            }\r\n          }\r\n        }\r\n      }\r\n      customer {\r\n        id\r\n        email\r\n      }\r\n    }\r\n    userErrors {\r\n      field\r\n      message\r\n    }\r\n  }\r\n}\r\n';
+  const mutation = `mutation draftOrderCreate($input: DraftOrderInput!) {
+    draftOrderCreate(input: $input) {
+      draftOrder {
+        id
+        lineItems(first: 10) {
+          edges {
+            node {
+              title
+              quantity
+              originalUnitPrice
+              weight {
+                value
+                unit
+              }
+              customAttributes {
+                key
+                value
+              }
+            }
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }`;
 
   const requestBody = {
     query: mutation,
@@ -61,7 +87,6 @@ export async function createDraftOrder(
             { key: "Back Printing", value: formData.backPrinting }
           ]
         }],
-        customerId: customerId,
         tags: ["balance-payment", originalOrderData.name],
         shippingAddress: {
           address1: "123 Main Street",

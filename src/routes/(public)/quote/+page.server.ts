@@ -1,4 +1,4 @@
-import { createDefaultCalculator } from '$lib/quoteEngine/flatPrintingCalculator-v2';
+import { createDefaultCalculator } from '$lib/components/shared/quoteEngine/flatPrintingCalculator-v2';
 
 // This simulates the last submitted form data
 let lastFormData = {

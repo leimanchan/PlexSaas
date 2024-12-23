@@ -1,5 +1,5 @@
-import { getOrderDetails } from '$lib/apiTools/shopify/adminService';
-import { createDefaultCalculator } from '$lib/quoteEngine/flatPrintingCalculator-v2';
+import { getOrderDetails } from '$lib/components/admin/api/shopify/adminService';
+import { createDefaultCalculator } from '$lib/components/shared/quoteEngine/flatPrintingCalculator-v2';
 
 export function load() {
     return {

@@ -342,3 +342,888 @@ Homescreen Icons are from [Solar Broken Line Icons](https://www.svgrepo.com/coll
 We hope you enjoy SaaS Starter! If you build mobile apps, please check out its sponsor/creator.
 
 **[Kiln AI](https://getkiln.ai):** Free apps and tools for building high quality AI products.
+
+```
+PlexSaas
+├─ # Database Structure - Paper Inventory S.sql.md
+├─ .eslintignore
+├─ .eslintrc.cjs
+├─ .git
+│  ├─ COMMIT_EDITMSG
+│  ├─ FETCH_HEAD
+│  ├─ HEAD
+│  ├─ ORIG_HEAD
+│  ├─ branches
+│  ├─ config
+│  ├─ description
+│  ├─ hooks
+│  │  ├─ applypatch-msg.sample
+│  │  ├─ commit-msg.sample
+│  │  ├─ fsmonitor-watchman.sample
+│  │  ├─ post-update.sample
+│  │  ├─ pre-applypatch.sample
+│  │  ├─ pre-commit.sample
+│  │  ├─ pre-merge-commit.sample
+│  │  ├─ pre-push.sample
+│  │  ├─ pre-rebase.sample
+│  │  ├─ pre-receive.sample
+│  │  ├─ prepare-commit-msg.sample
+│  │  ├─ push-to-checkout.sample
+│  │  ├─ sendemail-validate.sample
+│  │  └─ update.sample
+│  ├─ index
+│  ├─ info
+│  │  └─ exclude
+│  ├─ logs
+│  │  ├─ HEAD
+│  │  └─ refs
+│  │     ├─ heads
+│  │     │  └─ main
+│  │     └─ remotes
+│  │        └─ origin
+│  │           ├─ HEAD
+│  │           └─ main
+│  ├─ objects
+│  │  ├─ 01
+│  │  │  ├─ 6e5eeab5eb84b8757cbbdeb86fabe3a0b3ba2d
+│  │  │  └─ b6efc9bb6cfba056028704d41fe762f5699883
+│  │  ├─ 03
+│  │  │  └─ 9f13e9cacb598b63695d885868c61703723844
+│  │  ├─ 04
+│  │  │  └─ d59110fded4066d2ae4346fd9612c7987a1800
+│  │  ├─ 07
+│  │  │  └─ 88e71f64f84a84984287c6fb383bd331bd9548
+│  │  ├─ 08
+│  │  │  └─ 61116edc0968f845e07b817af1457696943cd0
+│  │  ├─ 09
+│  │  │  ├─ 15f67c5268ce39dde467a602712736cefc7a20
+│  │  │  ├─ 1f9dce5dca048bde8f8d84407712c019b50a41
+│  │  │  └─ 5b4d67817d6494fca5eb01ea6cbfce6b2d7490
+│  │  ├─ 0a
+│  │  │  └─ f8849e62499089dfb40e6d510884116f6a9859
+│  │  ├─ 0b
+│  │  │  └─ 38ca7af424f1d61fc34f7c7dbf476b92376255
+│  │  ├─ 0f
+│  │  │  └─ de0166ecd512488c1b9c423990235943672d39
+│  │  ├─ 10
+│  │  │  └─ a744da209a65a6b5be184b967810bd982a5477
+│  │  ├─ 12
+│  │  │  ├─ 64d1432e381c8c23d8f1276a65b81616bc2e48
+│  │  │  ├─ a1af9fce773a97dbdc723105da887ace5ea484
+│  │  │  └─ b7fdfcb098fd836d2283e6df13930aaf80ad54
+│  │  ├─ 17
+│  │  │  └─ dcf39758f51954795796c5136e95c6adfefeb6
+│  │  ├─ 18
+│  │  │  └─ 8712aba50050931b8fcb57d2caa19556da3517
+│  │  ├─ 1a
+│  │  │  └─ 3e9409b92aa4a1ab0360fa9d0a9fe60338b3bf
+│  │  ├─ 1c
+│  │  │  └─ 375a240036f2896b3428c96a9b1349547c7c3b
+│  │  ├─ 1d
+│  │  │  ├─ 6ead268ff2a36ddf2a7180e74324fb70b6a047
+│  │  │  └─ cb18759e3a1b289f42a555cbe9241352849dd8
+│  │  ├─ 1e
+│  │  │  └─ 55eea5452f74573f89c708282f3fe2346e8ccb
+│  │  ├─ 1f
+│  │  │  ├─ 0760f911fb2b6a59665f3d93aec5874cedefda
+│  │  │  └─ 155b0f2dde572e61a0c8ac08cd30d1ecf9149a
+│  │  ├─ 20
+│  │  │  └─ 7d55d3fd276eef406c6ba1ccb13c0b243ea199
+│  │  ├─ 22
+│  │  │  └─ b787ac1b1b62cc66481b158d27a0bb8cd5e126
+│  │  ├─ 23
+│  │  │  ├─ 76dff2f356910a20037dad36d7fbf36e7954f8
+│  │  │  └─ a023e71996bab5cac0ab416dead4e496917a54
+│  │  ├─ 24
+│  │  │  └─ 0959c9c9c1cf8d3826798e6267756745bb2489
+│  │  ├─ 27
+│  │  │  └─ 0f3d9426fb27f0f847a917222e95a4cfd49f79
+│  │  ├─ 29
+│  │  │  ├─ 56434f34b6454d30bf21272b430e8aa89b0bc3
+│  │  │  └─ ed2b1bcd947440769b81e794c9ff48319f3266
+│  │  ├─ 2a
+│  │  │  ├─ 5098470bc0f148a562dfe1459e31e38a28b01c
+│  │  │  └─ 996b604b46856ed130dc6167b430a31ff5129e
+│  │  ├─ 2b
+│  │  │  └─ d21be1b418d66d9d49e4fe70bb9f9e4bc1141f
+│  │  ├─ 2d
+│  │  │  └─ 67ffe27527ac3dc73a5e64e26d5108e71db3c8
+│  │  ├─ 2e
+│  │  │  ├─ 57ddbce6e8c6f1f17a5bd7ed2040a3154d085d
+│  │  │  └─ de1470eb11ac674d57fd4dd3f12ed9ceb7bf37
+│  │  ├─ 2f
+│  │  │  └─ 88e304f9c97aadf3fb9149219a2ec83ccceedb
+│  │  ├─ 30
+│  │  │  ├─ 9b592e40baf34433b193abba68a4e19ec86f82
+│  │  │  └─ b862d71255db923c61abd436d3689acb0cfff3
+│  │  ├─ 31
+│  │  │  └─ bc7d1808dac5d662d5ed80cbac275d19d33255
+│  │  ├─ 32
+│  │  │  └─ cbd17f99c1744903a9e31e52eb838bd20ece1b
+│  │  ├─ 33
+│  │  │  └─ a6983c0b1aa260f4ebe41583c8a03b5bd7601f
+│  │  ├─ 34
+│  │  │  └─ 05e36edae995b0b97b9e47193d835a2fedb356
+│  │  ├─ 36
+│  │  │  └─ d83367291c3c5b8926aceb78e0464c7346a25d
+│  │  ├─ 37
+│  │  │  ├─ 8095327f767562b2f1b20162413b7b768a3f92
+│  │  │  ├─ b8b33cdc63d05e074a8cefa37c33334824c680
+│  │  │  ├─ c299d195987c5efdde909340bbd5a4354c783f
+│  │  │  └─ ea40045ad6bb5089d5d30e9f80448dacf9c3c5
+│  │  ├─ 38
+│  │  │  └─ 90a19428c1c08dcfe1db16eb931f2506e76bc4
+│  │  ├─ 39
+│  │  │  └─ cc538c0f9cf5672fae62bbaf8c85626f5e8676
+│  │  ├─ 3c
+│  │  │  └─ 50ab781e22fef52572ee173342853745960ca4
+│  │  ├─ 3d
+│  │  │  └─ b96ed7468d19059dd0d59e4ca914f662a41b25
+│  │  ├─ 3e
+│  │  │  └─ a75e43778d6cf4f7f4d3baa0bd73ee172cb3a8
+│  │  ├─ 3f
+│  │  │  ├─ 2e41c29934481722e40157e2e82b04d1b298bd
+│  │  │  └─ e687a675f9bc6f8eb1157b003ca67b9341dc7f
+│  │  ├─ 40
+│  │  │  └─ 5edef4c45e4e157d180695f924f2b369f7256a
+│  │  ├─ 42
+│  │  │  └─ 94c72ee473c2ddbfb9e5cb0c6f6f7da036e8c0
+│  │  ├─ 46
+│  │  │  └─ be75c40997a12eb1643161c36768c5f6999ebf
+│  │  ├─ 47
+│  │  │  └─ 97384f6592e038b0bdf1265f86188dd9552faf
+│  │  ├─ 4a
+│  │  │  └─ b05b6163cc183b5314aa37754d7f655cbc52f5
+│  │  ├─ 4b
+│  │  │  ├─ 3229fa3708ef68c5bdf7e7518c3bc6ed7f181d
+│  │  │  └─ d772a996a8ee9b1a0ea08ed3738d59eb626d75
+│  │  ├─ 4c
+│  │  │  └─ 991a680ef9115a20ffd0c511bbc69677a88bfe
+│  │  ├─ 4d
+│  │  │  ├─ 05e10a8a9d7f1dc8900f6960348ac66d2dda97
+│  │  │  └─ 5f76ea8c4753b0a3cc8aad8618251df160d114
+│  │  ├─ 4e
+│  │  │  ├─ 4fd9716c542947d13bb4de00a8abe5d3ecb7f9
+│  │  │  └─ c87733b2910b6670261651853a838e27ee18f8
+│  │  ├─ 4f
+│  │  │  └─ 6274a7088b06918db0cfc524b2ee0385d00691
+│  │  ├─ 50
+│  │  │  └─ e005cdeeccef33b163b5957a45e13701f5f96d
+│  │  ├─ 52
+│  │  │  └─ 8002f9d4567d998ad948bd321dff18586c0d3f
+│  │  ├─ 53
+│  │  │  └─ e949667d35adaf4066fdf044687cf3a9249cc7
+│  │  ├─ 55
+│  │  │  └─ cd33fed5d49702e246eab228b0b841ae123b5b
+│  │  ├─ 56
+│  │  │  ├─ 2b369c77b64938ddc84a450779a9295a4dc696
+│  │  │  └─ 52e9b0af68b7badb80fbd9c9a8a3aeed3c1377
+│  │  ├─ 57
+│  │  │  └─ e35f454a7ccf0a30d20c920d2d57a8c7eb092b
+│  │  ├─ 58
+│  │  │  ├─ a0fcde60902f76afa1315cc4ea989f9388b909
+│  │  │  └─ a1c381a6a8d972ffb3219587dec4e3117952cc
+│  │  ├─ 5a
+│  │  │  └─ a2f4637c2bcdb49cc3d4b969daad2090c9bbb0
+│  │  ├─ 5c
+│  │  │  ├─ 2a7c0ae40002658f5b42634000fe104f3a14e5
+│  │  │  └─ f465db5186e2232709fb8d9272286e64f21060
+│  │  ├─ 60
+│  │  │  ├─ 2b02464fef5999fab182ae8475a7c1f42eaf41
+│  │  │  └─ c289ee4dc048fa24e109ba4eb52cc9db3a1a4b
+│  │  ├─ 62
+│  │  │  └─ 31a7607b5eff88a1ba024b6517ecd7dde20dab
+│  │  ├─ 66
+│  │  │  └─ 4d6733e14e809bf7845012ec509e1a5df91988
+│  │  ├─ 68
+│  │  │  └─ 6e7d47c1c988ec5127fac429efcd6af392ee16
+│  │  ├─ 69
+│  │  │  ├─ 07a37ac407fd2fe4d11c8cd1776aabac392946
+│  │  │  └─ 3ab6edfc72c08dfcc84f118e49c256617cfd98
+│  │  ├─ 6a
+│  │  │  └─ f48ea9bb91c0c0ae1c308f491fd39dbe4f9cb5
+│  │  ├─ 6b
+│  │  │  └─ f9c865eece8421e6b15714d48f8f32564fef8b
+│  │  ├─ 6c
+│  │  │  ├─ 43db48d16f2b106e399f85e09b27bc8c7ba3db
+│  │  │  ├─ 6b166ae447bae9f1ec8dfb4be55f0c9341510b
+│  │  │  └─ b3b8cc55f6a9d6938aa2ad083a5aedd6fa8e54
+│  │  ├─ 6e
+│  │  │  └─ 9ab2e2e297100710e0b2f23faf9dbdef664979
+│  │  ├─ 6f
+│  │  │  ├─ 489da0f092195fde2d693db277483491445a75
+│  │  │  └─ a1f8b4fb1f08c92a34cab066807fbd3bc2140f
+│  │  ├─ 70
+│  │  │  └─ 7fe37f318cea49d21386887da08c28e1f6d57c
+│  │  ├─ 72
+│  │  │  └─ ba5e2bd206f3c634301f9054b56b1db6a2b08d
+│  │  ├─ 75
+│  │  │  └─ 05b0d80f45c5ebe9d582cde4e00eeb7f222443
+│  │  ├─ 76
+│  │  │  └─ 231378be6f2b98096a75730f46b220a469ffca
+│  │  ├─ 7a
+│  │  │  └─ 8db24ba6adf085ff3c95186091752c1a038bae
+│  │  ├─ 7d
+│  │  │  └─ d82a70782d064dfd8d557defaae4a5ccb56e3a
+│  │  ├─ 80
+│  │  │  └─ 8324994d46498c017666640b099bf7b9b18d41
+│  │  ├─ 81
+│  │  │  ├─ 2e63024e10d92338f4d2d53a15f06891592aae
+│  │  │  └─ 5bf0412f931a3cf7c45398e3cfc3368b159a6c
+│  │  ├─ 84
+│  │  │  └─ f560fface1e2f9b0363cf4a4c94681aa0f1879
+│  │  ├─ 85
+│  │  │  └─ 5ccd005366ad2917bed3022f6f0eac4a5e6fcb
+│  │  ├─ 87
+│  │  │  ├─ 474f161ba36339b787694847333c3d0ba5cfd7
+│  │  │  └─ 5fa6fab4c62188d2d141ca2ba81d1651edc110
+│  │  ├─ 88
+│  │  │  └─ 6accfd4dbcefa86975c1aaa2d917f6cd9c1d24
+│  │  ├─ 89
+│  │  │  └─ f0b3072d8e1bd1fac785069772dbee2c89032f
+│  │  ├─ 8a
+│  │  │  └─ ff51f247ce0ca5f94ab83ba82d564286177d93
+│  │  ├─ 8e
+│  │  │  └─ 13846b5c9b7b0c6fb1fdc02427afb8d0004e13
+│  │  ├─ 92
+│  │  │  ├─ 28060369749e4eb56cd4b4542b3ca28b1e99d9
+│  │  │  ├─ 509d527481147afa978ce498fe3b05b41938ae
+│  │  │  └─ 81e9ede2a0755c0cec01c930be9425f83facc0
+│  │  ├─ 93
+│  │  │  ├─ 234dc5145b5112cd29882ea4c294d7dc23676e
+│  │  │  └─ 8994e0a3de5def0525878ee69d85a679fecc75
+│  │  ├─ 94
+│  │  │  └─ ce66e5fcfae4ca7bdf6ce3f29b856d5f0cc68c
+│  │  ├─ 95
+│  │  │  └─ c049aac8b540ce56e5101cac970ae4e1bade2e
+│  │  ├─ 96
+│  │  │  └─ 7445914f508846f6d42ba11b53551d406d49fe
+│  │  ├─ 99
+│  │  │  └─ 4c0664c5497b315ef2d1a3b319cb8f41938d08
+│  │  ├─ 9a
+│  │  │  ├─ 06a5787a0107e5d0fe1a98ca145df6dd99023e
+│  │  │  └─ 090bc51862e1fd9b6de9e2ac39f6f028c32e66
+│  │  ├─ 9b
+│  │  │  └─ 0f9b07a631012912dad39562edbbb2902612d8
+│  │  ├─ 9c
+│  │  │  └─ 26cf3a57f16caa59a65bef5592692790f7c2e8
+│  │  ├─ 9d
+│  │  │  └─ bd12328de2be5aa58f0bf19ade25bb1d497254
+│  │  ├─ 9e
+│  │  │  └─ 1484a32f798dde1ce1704927b9102b458d7d06
+│  │  ├─ 9f
+│  │  │  ├─ 544762ac5c8c6b56ff76e0cf9b88edb8c5859d
+│  │  │  └─ 5d47d2461cfde5f49bff1d8ea119ff58d4b68c
+│  │  ├─ a0
+│  │  │  ├─ 367dc670b4fee6518c99d68db6db9270e3bb30
+│  │  │  ├─ f1e120d83eaac5dff1cdb67dfbb3cd680df207
+│  │  │  └─ f3e044fa19952b1ea85c1e13d76a37f7a2d12b
+│  │  ├─ a2
+│  │  │  └─ deb54344f7d947d0e94c56b9bc9d34d9c688cf
+│  │  ├─ a3
+│  │  │  └─ 4e14dc60aa9524afcd265360af6ba6d1e633c7
+│  │  ├─ a4
+│  │  │  ├─ 90aec077e972cfd7278270ad3b7349279c81b4
+│  │  │  └─ bb9d4d49d290e5edb2df77f52adc2bb3ee3b2d
+│  │  ├─ a5
+│  │  │  └─ 8cde8a67b31c387d236cefc86135e3f829f832
+│  │  ├─ a7
+│  │  │  ├─ 70b5b3d73c5433575dcad9cfd93955aecc8cf0
+│  │  │  ├─ b44785083ba9453185932ab7d436cee3619d86
+│  │  │  ├─ d4edd27369b1e08e6fbf27bfd56f6201f6beec
+│  │  │  └─ f8cb693d3c3a666d9c313e093f6a3efe2e08ce
+│  │  ├─ a8
+│  │  │  └─ 4530cbc82db86a60625eec32875c8b7a115d80
+│  │  ├─ a9
+│  │  │  └─ 251998edc10ad9ab6daf9aa917aab619624bd4
+│  │  ├─ aa
+│  │  │  └─ 26cfae0998d66725358f2f1d029c567e45e33c
+│  │  ├─ ae
+│  │  │  └─ 2d92d1d6fee9a862e1aa2929f045d623db5771
+│  │  ├─ af
+│  │  │  ├─ 262f6c423b6f881d454c10d1aa1dd0acaa28f1
+│  │  │  └─ 445aac553afa8272bc6e831f868b76aa3e927a
+│  │  ├─ b5
+│  │  │  └─ b3a989defa9509781236768988b0732ccf261e
+│  │  ├─ b6
+│  │  │  └─ 3ce45789390936d67a94b40b072828fa8b32c8
+│  │  ├─ b7
+│  │  │  └─ e6656ebc510b5b6c21b88bd1d5ce2830fafec7
+│  │  ├─ b8
+│  │  │  ├─ 514cb300b615d6afe64557fd6c8b8a3c3c19c4
+│  │  │  └─ c840254cd1a681cf9626cbd1b7f35f01222e9c
+│  │  ├─ ba
+│  │  │  ├─ 4c7973056234beba57ba5c50ab4d1ac450031e
+│  │  │  └─ fc1a492d96e84823ee0b1d47e0702e049e69d3
+│  │  ├─ bc
+│  │  │  └─ 77f4755303b5c8995c9c406ba294f1537d861d
+│  │  ├─ bd
+│  │  │  └─ 31393311ee05b247f14f6bd66f6ba2d2d0cb30
+│  │  ├─ be
+│  │  │  ├─ 08be14db0e5b6ecf2bb60d7dcf9ba341027384
+│  │  │  ├─ 7a17efe346dcf1ac66007f0e912604842866be
+│  │  │  └─ af19c9d2afd27c98898647b15aa9e240ce5e13
+│  │  ├─ bf
+│  │  │  ├─ 5f94c6cb183bcdfd04b91b82c4c209abc777ca
+│  │  │  └─ 95eea123d7e8da888d37271674485931968ac3
+│  │  ├─ c2
+│  │  │  └─ 1c2f5ddcef30b7fc4cce0924edc0451e1373a6
+│  │  ├─ c4
+│  │  │  └─ 86dd7ecb99764e20692de79f49ce6cd153da20
+│  │  ├─ c5
+│  │  │  └─ ff2d4c839005380d2cd8a4d3af7645ec8c1b5f
+│  │  ├─ c7
+│  │  │  ├─ 128993cc4f4ca7067a66c4ab65a5648ba56215
+│  │  │  └─ 699a19d97f3ae01040548b2c13b83324c31cc1
+│  │  ├─ ca
+│  │  │  ├─ 7140a9aeb9838688ac563c2431a8296175c555
+│  │  │  └─ c88ed6177b54c3a4469e773e1227031a86d06f
+│  │  ├─ cc
+│  │  │  └─ 3300f49d608fb85423698669f098284a3239c5
+│  │  ├─ cd
+│  │  │  ├─ 9c178ef43cf5b4de9bf9daf8c27989698ba726
+│  │  │  └─ a1a3ffb0881655f74b6a46a67758eb97ae54a2
+│  │  ├─ cf
+│  │  │  ├─ 58fb676a9965d3fc0a727deb2126398ed82079
+│  │  │  └─ 93673f63afac8b679dd49da5b1b3d8f665d918
+│  │  ├─ d0
+│  │  │  └─ 82683a6667085819587446e700af65086d2b47
+│  │  ├─ d1
+│  │  │  ├─ 0fc45e2e9468a3e6e316ab02a838509faaed28
+│  │  │  ├─ ab988d376697c4eadf69fef6a973183724e225
+│  │  │  └─ cf8e0e4737ec2e91d397bb8f6a56362de3b5dc
+│  │  ├─ d4
+│  │  │  └─ 5c953787633945bd4816ee2550deb947f4219b
+│  │  ├─ d5
+│  │  │  ├─ 97badb5626ccc0176fbd455672885ae479cc99
+│  │  │  └─ 97ff93a5bd75979770f520490e6545c41b70f0
+│  │  ├─ d6
+│  │  │  ├─ 48c3e6f318797f5bb6984c6d4a83bfcea3d064
+│  │  │  ├─ 8f8e2afbfb54df9a956de862c5526cf56812ba
+│  │  │  └─ a101c07aab50559339a0638be4199f790d4c32
+│  │  ├─ d7
+│  │  │  ├─ 16f61c91ef805e64e1e875040969c3c8c6eb55
+│  │  │  ├─ 6876dd96b3da1ab5a180d82a01dec45980c2eb
+│  │  │  └─ f42194dc935b6b524dcdae28ab7f5344d5f227
+│  │  ├─ da
+│  │  │  └─ 1b176f53cc5eacc5f5c5a4b427c084a2b7e23a
+│  │  ├─ db
+│  │  │  └─ e258d1f23dc64a007c6acadd2e67be29ce764a
+│  │  ├─ dd
+│  │  │  └─ 1069ae0a8c86f59814ea7fa41f0d65bc33f6cd
+│  │  ├─ e0
+│  │  │  ├─ 1bf1fd005be651c8cdcf3419c9f56c4eb58aed
+│  │  │  └─ 4f2b34b72414c4f67edb1112b215c85e59d606
+│  │  ├─ e4
+│  │  │  ├─ 54270e067145dc3a64636ce45f3ac546d38660
+│  │  │  └─ d6e2a74db05c8cb7b94f2774a8d3e608f307c7
+│  │  ├─ e5
+│  │  │  ├─ a3d32409fe278120bcdb49c596c51ca7ce81ce
+│  │  │  ├─ b811ebf6479699009a20bb7982932f5d1ad4cf
+│  │  │  └─ fa764d97c63cccfe23550f4cea64299ab2df6d
+│  │  ├─ e6
+│  │  │  └─ 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+│  │  ├─ ea
+│  │  │  └─ 9dcec95df8d39d3ae85f9030cef8b25c97ad06
+│  │  ├─ eb
+│  │  │  ├─ 2db74b749c08b0ce1f00426ddcd8838ce17a3b
+│  │  │  └─ c0ae6feda8a199e0188301f852e91bd62b43fd
+│  │  ├─ f0
+│  │  │  └─ fec5a90ddde3dc37e80a3af015bcf3af55847f
+│  │  ├─ f1
+│  │  │  └─ 0dda69b5a94b611f806e489ea246d5c853657f
+│  │  ├─ f2
+│  │  │  ├─ 0d6b443560053c9266e7cbe73ad77e3ac9f0cc
+│  │  │  └─ c56f3287abbfed68cc95711c28327427543159
+│  │  ├─ f3
+│  │  │  ├─ 649d085bfa5230449fcae3d33cc0876bfed525
+│  │  │  └─ b0554f6da84de03b9f7a40c821ec6d2601e2a1
+│  │  ├─ f7
+│  │  │  └─ 49e92850d481ce9fd31681dc8f422d455b871b
+│  │  ├─ fa
+│  │  │  └─ 8457962f7a7437023d2a58f71c86bc8fbff6f3
+│  │  ├─ fb
+│  │  │  └─ 129bb0d6df02e88ce7c84688e8071fa1c2e70e
+│  │  ├─ fc
+│  │  │  ├─ 9c1fea8d9ee2a577af732d6f918d515c12f1cd
+│  │  │  └─ e49a704bc37fe0cfc8a2eabff3e5da563902c9
+│  │  ├─ fd
+│  │  │  ├─ af5bd7dd7ff127dd05a2291edce105ac9182a5
+│  │  │  └─ f620d864ce69a3662f4049f3310f5e758acc69
+│  │  ├─ info
+│  │  └─ pack
+│  │     ├─ pack-1ebe12e4114800f7d25bd8d519dd7074d08df679.idx
+│  │     ├─ pack-1ebe12e4114800f7d25bd8d519dd7074d08df679.pack
+│  │     └─ pack-1ebe12e4114800f7d25bd8d519dd7074d08df679.rev
+│  ├─ packed-refs
+│  └─ refs
+│     ├─ heads
+│     │  └─ main
+│     ├─ remotes
+│     │  └─ origin
+│     │     ├─ HEAD
+│     │     └─ main
+│     └─ tags
+├─ .github
+│  └─ workflows
+│     ├─ build.yml
+│     ├─ format.yml
+│     ├─ linting.yml
+│     └─ tests.yml
+├─ .gitignore
+├─ .npmrc
+├─ .prettierignore
+├─ .prettierrc
+├─ .svelte-kit
+│  ├─ ambient.d.ts
+│  ├─ generated
+│  │  ├─ client
+│  │  │  ├─ app.js
+│  │  │  ├─ matchers.js
+│  │  │  └─ nodes
+│  │  │     ├─ 0.js
+│  │  │     ├─ 1.js
+│  │  │     ├─ 10.js
+│  │  │     ├─ 11.js
+│  │  │     ├─ 12.js
+│  │  │     ├─ 13.js
+│  │  │     ├─ 14.js
+│  │  │     ├─ 15.js
+│  │  │     ├─ 16.js
+│  │  │     ├─ 17.js
+│  │  │     ├─ 18.js
+│  │  │     ├─ 19.js
+│  │  │     ├─ 2.js
+│  │  │     ├─ 20.js
+│  │  │     ├─ 21.js
+│  │  │     ├─ 22.js
+│  │  │     ├─ 23.js
+│  │  │     ├─ 24.js
+│  │  │     ├─ 25.js
+│  │  │     ├─ 26.js
+│  │  │     ├─ 27.js
+│  │  │     ├─ 28.js
+│  │  │     ├─ 29.js
+│  │  │     ├─ 3.js
+│  │  │     ├─ 30.js
+│  │  │     ├─ 31.js
+│  │  │     ├─ 32.js
+│  │  │     ├─ 33.js
+│  │  │     ├─ 34.js
+│  │  │     ├─ 35.js
+│  │  │     ├─ 36.js
+│  │  │     ├─ 37.js
+│  │  │     ├─ 38.js
+│  │  │     ├─ 39.js
+│  │  │     ├─ 4.js
+│  │  │     ├─ 40.js
+│  │  │     ├─ 41.js
+│  │  │     ├─ 42.js
+│  │  │     ├─ 5.js
+│  │  │     ├─ 6.js
+│  │  │     ├─ 7.js
+│  │  │     ├─ 8.js
+│  │  │     └─ 9.js
+│  │  ├─ root.js
+│  │  ├─ root.svelte
+│  │  └─ server
+│  │     └─ internal.js
+│  ├─ non-ambient.d.ts
+│  ├─ tsconfig.json
+│  └─ types
+│     ├─ route_meta_data.json
+│     └─ src
+│        └─ routes
+│           ├─ $types.d.ts
+│           ├─ (admin)
+│           │  └─ account
+│           │     ├─ (menu)
+│           │     │  ├─ billing
+│           │     │  │  └─ manage
+│           │     │  └─ settings
+│           │     │     ├─ change_email
+│           │     │     ├─ change_email_subscription
+│           │     │     ├─ change_password
+│           │     │     ├─ delete_account
+│           │     │     ├─ edit_profile
+│           │     │     └─ reset_password
+│           │     ├─ api
+│           │     ├─ create_profile
+│           │     ├─ select_plan
+│           │     ├─ sign_out
+│           │     └─ subscribe
+│           │        └─ [slug]
+│           ├─ (auth)
+│           │  ├─ $types.d.ts
+│           │  └─ account
+│           │     ├─ $types.d.ts
+│           │     ├─ (menu)
+│           │     │  ├─ $types.d.ts
+│           │     │  ├─ billing
+│           │     │  │  ├─ $types.d.ts
+│           │     │  │  ├─ manage
+│           │     │  │  │  ├─ $types.d.ts
+│           │     │  │  │  └─ proxy+page.server.ts
+│           │     │  │  └─ proxy+page.server.ts
+│           │     │  └─ settings
+│           │     │     ├─ $types.d.ts
+│           │     │     ├─ change_email
+│           │     │     │  └─ $types.d.ts
+│           │     │     ├─ change_email_subscription
+│           │     │     │  └─ $types.d.ts
+│           │     │     ├─ change_password
+│           │     │     │  └─ $types.d.ts
+│           │     │     ├─ delete_account
+│           │     │     │  └─ $types.d.ts
+│           │     │     ├─ edit_profile
+│           │     │     │  └─ $types.d.ts
+│           │     │     └─ reset_password
+│           │     │        └─ $types.d.ts
+│           │     ├─ api
+│           │     │  └─ $types.d.ts
+│           │     ├─ create_profile
+│           │     │  └─ $types.d.ts
+│           │     ├─ proxy+layout.server.ts
+│           │     ├─ select_plan
+│           │     │  └─ $types.d.ts
+│           │     ├─ sign_out
+│           │     │  └─ $types.d.ts
+│           │     └─ subscribe
+│           │        └─ [slug]
+│           │           ├─ $types.d.ts
+│           │           └─ proxy+page.server.ts
+│           ├─ (csr)
+│           │  ├─ $types.d.ts
+│           │  └─ draftOrder
+│           ├─ (marketing)
+│           │  ├─ auth
+│           │  │  └─ callback
+│           │  ├─ blog
+│           │  │  ├─ (posts)
+│           │  │  │  ├─ awesome_post
+│           │  │  │  ├─ example_blog_post
+│           │  │  │  └─ how_we_built_our_41kb_saas_website
+│           │  │  └─ rss.xml
+│           │  ├─ contact_us
+│           │  ├─ draftOrder
+│           │  │  └─ createDraftOrder
+│           │  ├─ knowledge-base
+│           │  │  └─ api
+│           │  ├─ login
+│           │  │  ├─ current_password_error
+│           │  │  ├─ forgot_password
+│           │  │  ├─ sign_in
+│           │  │  └─ sign_up
+│           │  ├─ pricing
+│           │  ├─ quote
+│           │  ├─ quoteChat
+│           │  │  └─ api
+│           │  │     └─ chatGPT
+│           │  ├─ search
+│           │  │  └─ api.json
+│           │  └─ sitemap.xml
+│           ├─ (protected)
+│           │  ├─ $types.d.ts
+│           │  ├─ draftOrder
+│           │  │  ├─ $types.d.ts
+│           │  │  └─ api
+│           │  │     └─ createDraftOrder
+│           │  │        └─ $types.d.ts
+│           │  ├─ knowledge-base
+│           │  │  ├─ $types.d.ts
+│           │  │  └─ api
+│           │  │     └─ $types.d.ts
+│           │  └─ proxy+layout.server.ts
+│           ├─ (public)
+│           │  ├─ $types.d.ts
+│           │  ├─ auth
+│           │  │  └─ callback
+│           │  │     └─ $types.d.ts
+│           │  ├─ blog
+│           │  │  ├─ $types.d.ts
+│           │  │  ├─ (posts)
+│           │  │  │  ├─ $types.d.ts
+│           │  │  │  ├─ awesome_post
+│           │  │  │  │  └─ $types.d.ts
+│           │  │  │  ├─ example_blog_post
+│           │  │  │  │  └─ $types.d.ts
+│           │  │  │  └─ how_we_built_our_41kb_saas_website
+│           │  │  │     └─ $types.d.ts
+│           │  │  └─ rss.xml
+│           │  │     └─ $types.d.ts
+│           │  ├─ contact_us
+│           │  │  ├─ $types.d.ts
+│           │  │  └─ proxy+page.server.ts
+│           │  ├─ login
+│           │  │  ├─ $types.d.ts
+│           │  │  ├─ current_password_error
+│           │  │  │  └─ $types.d.ts
+│           │  │  ├─ forgot_password
+│           │  │  │  └─ $types.d.ts
+│           │  │  ├─ proxy+layout.server.ts
+│           │  │  ├─ sign_in
+│           │  │  │  └─ $types.d.ts
+│           │  │  └─ sign_up
+│           │  │     └─ $types.d.ts
+│           │  ├─ pricing
+│           │  │  └─ $types.d.ts
+│           │  ├─ proxy+layout.server.ts
+│           │  ├─ quote
+│           │  │  └─ $types.d.ts
+│           │  ├─ quoteChat
+│           │  │  ├─ $types.d.ts
+│           │  │  └─ api
+│           │  │     └─ chatGPT
+│           │  │        └─ $types.d.ts
+│           │  ├─ search
+│           │  │  ├─ $types.d.ts
+│           │  │  └─ api.json
+│           │  │     └─ $types.d.ts
+│           │  └─ sitemap.xml
+│           │     └─ $types.d.ts
+│           ├─ api
+│           │  └─ shopify
+│           │     └─ cart
+│           │        └─ $types.d.ts
+│           └─ proxy+layout.server.ts
+├─ .vscode
+│  └─ settings.json
+├─ LICENSE
+├─ README.md
+├─ SECURITY.md
+├─ analytics_docs.md
+├─ checks.sh
+├─ database_migration.sql
+├─ email_docs.md
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.js
+├─ src
+│  ├─ DatabaseDefinitions.ts
+│  ├─ ambient.d.ts
+│  ├─ app.css
+│  ├─ app.d.ts
+│  ├─ app.html
+│  ├─ config.ts
+│  ├─ hooks.server.ts
+│  ├─ index.test.ts
+│  ├─ lib
+│  │  ├─ apiTools
+│  │  │  ├─ graphQL
+│  │  │  │  └─ graphqlClient.ts
+│  │  │  └─ shopify
+│  │  │     ├─ adminQueries.ts
+│  │  │     ├─ adminService.ts
+│  │  │     ├─ shopifyQueries.ts
+│  │  │     └─ shopifyService.ts
+│  │  ├─ build_index.ts
+│  │  ├─ components
+│  │  │  └─ chat
+│  │  │     ├─ ChatInterface.svelte
+│  │  │     └─ ChatMessage.svelte
+│  │  ├─ emails
+│  │  │  ├─ welcome_email_html.hbs
+│  │  │  └─ welcome_email_text.hbs
+│  │  ├─ index.js
+│  │  ├─ load_helpers.ts
+│  │  ├─ mailer.test.ts
+│  │  ├─ mailer.ts
+│  │  ├─ quoteEngine
+│  │  │  ├─ flatPrintingCalculator-v2.js
+│  │  │  └─ index.ts
+│  │  ├─ server
+│  │  │  └─ config
+│  │  │     └─ flatConfig.js
+│  │  ├─ shipping
+│  │  │  └─ shipping-calc.js
+│  │  └─ users
+│  │     └─ auth.ts
+│  ├─ params
+│  │  └─ lowercase.ts
+│  └─ routes
+│     ├─ (auth)
+│     │  ├─ +layout.svelte
+│     │  └─ account
+│     │     ├─ (menu)
+│     │     │  ├─ +layout.svelte
+│     │     │  ├─ +page.server.ts
+│     │     │  ├─ +page.svelte
+│     │     │  ├─ billing
+│     │     │  │  ├─ +page.server.ts
+│     │     │  │  ├─ +page.svelte
+│     │     │  │  └─ manage
+│     │     │  │     └─ +page.server.ts
+│     │     │  └─ settings
+│     │     │     ├─ +page.svelte
+│     │     │     ├─ change_email
+│     │     │     │  └─ +page.svelte
+│     │     │     ├─ change_email_subscription
+│     │     │     │  └─ +page.svelte
+│     │     │     ├─ change_password
+│     │     │     │  └─ +page.svelte
+│     │     │     ├─ delete_account
+│     │     │     │  └─ +page.svelte
+│     │     │     ├─ edit_profile
+│     │     │     │  └─ +page.svelte
+│     │     │     ├─ reset_password
+│     │     │     │  └─ +page.svelte
+│     │     │     └─ settings_module.svelte
+│     │     ├─ +layout.server.ts
+│     │     ├─ +layout.svelte
+│     │     ├─ +layout.ts
+│     │     ├─ api
+│     │     │  ├─ +page.server.ts
+│     │     │  └─ page.server.test.ts
+│     │     ├─ create_profile
+│     │     │  ├─ +page.server.ts
+│     │     │  ├─ +page.svelte
+│     │     │  └─ +page.ts
+│     │     ├─ select_plan
+│     │     │  └─ +page.svelte
+│     │     ├─ sign_out
+│     │     │  └─ +page.svelte
+│     │     ├─ subscribe
+│     │     │  └─ [slug]
+│     │     │     └─ +page.server.ts
+│     │     └─ subscription_helpers.server.ts
+│     ├─ (csr)
+│     │  └─ +layout.svelte
+│     ├─ (protected)
+│     │  ├─ +layout.server.ts
+│     │  ├─ +layout.svelte
+│     │  ├─ draftOrder
+│     │  │  ├─ +page.server.ts
+│     │  │  ├─ +page.svelte
+│     │  │  └─ api
+│     │  │     └─ createDraftOrder
+│     │  │        └─ +server.ts
+│     │  └─ knowledge-base
+│     │     ├─ +page.svelte
+│     │     └─ api
+│     │        └─ +server.js
+│     ├─ (public)
+│     │  ├─ +layout.server.ts
+│     │  ├─ +layout.svelte
+│     │  ├─ +page.svelte
+│     │  ├─ +page.ts
+│     │  ├─ auth
+│     │  │  └─ callback
+│     │  │     └─ +server.js
+│     │  ├─ blog
+│     │  │  ├─ (posts)
+│     │  │  │  ├─ +layout.svelte
+│     │  │  │  ├─ awesome_post
+│     │  │  │  │  └─ +page.svelte
+│     │  │  │  ├─ example_blog_post
+│     │  │  │  │  └─ +page.svelte
+│     │  │  │  └─ how_we_built_our_41kb_saas_website
+│     │  │  │     └─ +page.svelte
+│     │  │  ├─ +layout.ts
+│     │  │  ├─ +page.svelte
+│     │  │  ├─ posts.ts
+│     │  │  └─ rss.xml
+│     │  │     └─ +server.ts
+│     │  ├─ contact_us
+│     │  │  ├─ +page.server.ts
+│     │  │  └─ +page.svelte
+│     │  ├─ login
+│     │  │  ├─ +layout.server.ts
+│     │  │  ├─ +layout.svelte
+│     │  │  ├─ +layout.ts
+│     │  │  ├─ +page.svelte
+│     │  │  ├─ current_password_error
+│     │  │  │  └─ +page.svelte
+│     │  │  ├─ forgot_password
+│     │  │  │  ├─ +page.server.ts
+│     │  │  │  └─ +page.svelte
+│     │  │  ├─ login_config.ts
+│     │  │  ├─ sign_in
+│     │  │  │  ├─ +page.server.ts
+│     │  │  │  └─ +page.svelte
+│     │  │  └─ sign_up
+│     │  │     ├─ +page.server.ts
+│     │  │     └─ +page.svelte
+│     │  ├─ pricing
+│     │  │  ├─ +page.svelte
+│     │  │  ├─ +page.ts
+│     │  │  ├─ pricing_module.svelte
+│     │  │  └─ pricing_plans.ts
+│     │  ├─ quote
+│     │  │  ├─ +page.server.ts
+│     │  │  └─ +page.svelte
+│     │  ├─ quoteChat
+│     │  │  ├─ +page.server.ts
+│     │  │  ├─ +page.svelte
+│     │  │  └─ api
+│     │  │     └─ chatGPT
+│     │  │        └─ +server.ts
+│     │  ├─ search
+│     │  │  ├─ +page.server.ts
+│     │  │  ├─ +page.svelte
+│     │  │  └─ api.json
+│     │  │     └─ +server.ts
+│     │  └─ sitemap.xml
+│     │     └─ +server.ts
+│     ├─ (user)
+│     ├─ +error.svelte
+│     ├─ +layout.server.ts
+│     ├─ +layout.svelte
+│     └─ api
+│        └─ shopify
+│           └─ cart
+│              └─ +server.ts
+├─ static
+│  ├─ favicon.png
+│  ├─ images
+│  │  ├─ Docs
+│  │  │  ├─ ERP
+│  │  │  │  ├─ .cursorignore
+│  │  │  │  │  └─ _old-AI MIS-12-6-24
+│  │  │  │  └─ AI MIS-v2
+│  │  │  └─ catering
+│  │  ├─ cm_logo.svg
+│  │  ├─ example-home.png
+│  │  └─ rss.svg
+│  ├─ markdowns project management
+│  │  ├─ FP-save12-6-24.md
+│  │  ├─ MIS First Pass.md
+│  │  ├─ Principles of Manufacturing Business.md
+│  │  ├─ import tests
+│  │  │  ├─ custom shapes example
+│  │  │  ├─ departments example
+│  │  │  ├─ finish sizes example
+│  │  │  ├─ fold catalog example
+│  │  │  ├─ guillotene example
+│  │  │  ├─ indigo press example.txt
+│  │  │  ├─ machines example
+│  │  │  ├─ materials that arent stock example
+│  │  │  ├─ operations Finishing category example
+│  │  │  ├─ operations component example
+│  │  │  ├─ operations example
+│  │  │  ├─ operations imposition requirements example
+│  │  │  ├─ operations parameter example
+│  │  │  ├─ press process mapping example
+│  │  │  ├─ press speed set example
+│  │  │  ├─ press spoils example
+│  │  │  ├─ production ordering example
+│  │  │  ├─ quote questions example
+│  │  │  ├─ rates example
+│  │  │  ├─ stock cutting rules example
+│  │  │  ├─ stock example
+│  │  │  └─ stock group example
+│  │  ├─ sql editor shortcuts
+│  │  ├─ sql search for all triggers
+│  │  ├─ supabase triggers
+│  │  ├─ supabase_database_structure.md
+│  │  └─ tag-process.md
+│  └─ robots.txt
+├─ supabase
+│  └─ migrations
+│     ├─ 20240730010101_initial.sql
+│     └─ 20240731051052_add_unsubscribed_to_profiles.sql
+├─ svelte.config.js
+├─ tailwind.config.js
+├─ tsconfig.json
+└─ vite.config.ts
+
+```
