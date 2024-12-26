@@ -1,6 +1,10 @@
 <!-- src/routes/knowledge-base/+page.svelte -->
 <script>
-  let articles = $state([])
+  import { enhance } from "$app/forms"
+
+  let { data } = $props()
+  let articles = $state(data.articles || [])
+
   let currentArticle = $state({
     title: "",
     content: [],
@@ -20,6 +24,9 @@
 
   let selectedArticle = $state(null)
   let selectedArticles = $state(new Set())
+
+  // Add error state
+  let error = $state(null)
 
   function addContentSection(type) {
     const newSection = {
@@ -90,57 +97,82 @@
   }
 
   async function saveArticle() {
+    console.group(`Save Article Attempt`)
+    console.log("🟦 Attempting to save article:", currentArticle)
+
+    const form = new FormData()
+    form.append(
+      "article",
+      JSON.stringify({
+        title: currentArticle.title,
+        content: currentArticle.content,
+        seo: currentArticle.seo,
+        permission: currentArticle.permission,
+      }),
+    )
+
     try {
-      const response = await fetch("/knowledge-base/api", {
+      const response = await fetch("?/saveArticle", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(currentArticle),
+        body: form,
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to save article")
-      }
+      const result = await response.json()
+      console.log("🟪 Supabase Response:", result)
 
-      const savedArticle = await response.json()
-      articles = [...articles, savedArticle]
+      if (result.type === "success" && result.status === 200) {
+        console.log("✅ Article saved successfully")
 
-      // Reset the form
-      currentArticle = {
-        title: "",
-        content: [],
-        seo: {
-          keywords: null,
-          isEnabled: true,
-          description: null,
-          title: null,
-        },
-        permission: "ALL",
-        viewCount: "0",
-        likeCount: "0",
-        commentCount: "0",
-        attachmentCount: "0",
-        feedbackCount: "0",
+        // Parse the response data to get the ID
+        const parsedData = JSON.parse(result.data)
+        const articleId = parsedData[3] // The UUID is at index 3 in your response
+
+        // Create new article object with the ID
+        const newArticle = {
+          id: articleId, // Store the Supabase UUID
+          title: currentArticle.title,
+          content: currentArticle.content,
+          seo: currentArticle.seo,
+          permission: currentArticle.permission,
+          viewCount: "0",
+          likeCount: "0",
+          commentCount: "0",
+          attachmentCount: "0",
+          feedbackCount: "0",
+        }
+
+        console.log("📝 New article with ID:", newArticle)
+        articles = [...articles, newArticle]
+
+        // Reset the form
+        currentArticle = {
+          title: "",
+          content: [],
+          seo: {
+            keywords: null,
+            isEnabled: true,
+            description: null,
+            title: null,
+          },
+          permission: "ALL",
+          viewCount: "0",
+          likeCount: "0",
+          commentCount: "0",
+          attachmentCount: "0",
+          feedbackCount: "0",
+        }
+        error = null
+      } else {
+        console.warn("⚠️ Unexpected response:", result)
+        error = "Unexpected response from server. Please refresh the page."
       }
     } catch (error) {
-      console.error("Error saving article:", error)
-      alert("Failed to save article. Please try again.")
+      console.error("❌ Error saving article:", error)
+      error = "An unexpected error occurred while saving the article"
+    } finally {
+      console.groupEnd()
     }
   }
-
-  // Load saved articles
-  $effect(async () => {
-    try {
-      const response = await fetch("/knowledge-base/api")
-      if (response.ok) {
-        const data = await response.json()
-        articles = data
-      }
-    } catch (error) {
-      console.error("Error loading articles:", error)
-    }
-  })
 
   function viewArticle(article) {
     console.log("Viewing article:", article)
@@ -156,49 +188,87 @@
   }
 
   async function deleteSelected() {
+    console.group("Delete Selected Articles Attempt")
+    console.log("🗑️ Attempting to delete selected articles:", selectedArticles)
+
     if (!confirm("Are you sure you want to delete selected articles?")) return
 
-    try {
-      const articleIds = [...selectedArticles].map((article) => article.id)
+    const articleIds = [...selectedArticles].map((article) => article.id)
+    const form = new FormData()
+    form.append("ids", JSON.stringify(articleIds))
 
-      const response = await fetch("/knowledge-base/api", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(articleIds),
+    try {
+      const response = await fetch("?/deleteSelected", {
+        method: "POST",
+        body: form,
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to delete articles")
-      }
+      const result = await response.json()
+      console.log("🟪 Bulk Delete Response:", result)
 
-      // Remove deleted articles from the local state
-      articles = articles.filter((article) => !selectedArticles.has(article))
-      selectedArticles.clear()
+      if (result.type === "success" && result.status === 200) {
+        console.log("✅ Articles deleted successfully")
+
+        // Add a small delay to ensure Supabase has processed the deletion
+        await new Promise((resolve) => setTimeout(resolve, 500))
+
+        // Update the local articles array
+        articles = articles.filter((article) => !selectedArticles.has(article))
+        selectedArticles.clear()
+        console.log("📝 Updated articles list:", articles)
+      } else {
+        console.warn("⚠️ Unexpected response:", result)
+        alert("Failed to delete articles. Please try again.")
+      }
     } catch (error) {
-      console.error("Error deleting articles:", error)
-      alert("Failed to delete articles. Please try again.")
+      console.error("❌ Error deleting articles:", error)
+      alert("An error occurred while deleting the articles")
+    } finally {
+      console.groupEnd()
     }
   }
 
   async function deleteArticle(article) {
-    if (!confirm("Are you sure you want to delete this article?")) return
+    console.group("Delete Article Attempt")
+    console.log("🗑️ Attempting to delete article:", article)
+    console.log("🔑 Article ID:", article.id)
+
+    if (!confirm(`Are you sure you want to delete "${article.title}"?`)) return
+
+    const form = new FormData()
+    form.append("id", article.id)
 
     try {
-      const response = await fetch(`/knowledge-base/api/${article.id}`, {
-        method: "DELETE",
+      console.log("📤 Sending delete request...")
+      const response = await fetch("?/deleteArticle", {
+        method: "POST",
+        body: form,
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to delete article")
-      }
+      console.log("📥 Raw response:", response)
+      const result = await response.json()
+      console.log("🟪 Parsed delete response:", result)
 
-      // Remove deleted article from the local state
-      articles = articles.filter((a) => a.id !== article.id)
+      // Only update UI if we can confirm the deletion
+      if (
+        result.type === "success" &&
+        result.status === 200 &&
+        result.verificationCheck === "Article no longer exists"
+      ) {
+        console.log("✅ Article confirmed deleted")
+        articles = articles.filter((a) => a.id !== article.id)
+        console.log("📝 Updated articles list:", articles)
+      } else {
+        console.warn("⚠️ Delete operation may not have completed:", result)
+        alert(
+          "The delete operation may not have completed successfully. Please refresh the page to verify.",
+        )
+      }
     } catch (error) {
-      console.error("Error deleting article:", error)
-      alert("Failed to delete article. Please try again.")
+      console.error("❌ Error in delete operation:", error)
+      alert("An error occurred while deleting the article")
+    } finally {
+      console.groupEnd()
     }
   }
 </script>
@@ -209,11 +279,35 @@
   <div class="overflow-x-auto w-full">
     <div class="flex justify-between items-center p-4">
       <h2 class="text-xl font-bold">Knowledge Base Articles</h2>
-      {#if selectedArticles.size > 0}
-        <button class="btn btn-error btn-sm" onclick={deleteSelected}>
-          Delete Selected ({selectedArticles.size})
-        </button>
-      {/if}
+      <div class="actions">
+        {#if selectedArticles.size > 0}
+          <form
+            method="POST"
+            action="?/deleteSelected"
+            use:enhance={() => {
+              return {
+                success: () => {
+                  articles = articles.filter(
+                    (article) => !selectedArticles.has(article),
+                  )
+                  selectedArticles.clear()
+                },
+              }
+            }}
+          >
+            <input
+              type="hidden"
+              name="ids"
+              value={JSON.stringify(
+                [...selectedArticles].map((article) => article.id),
+              )}
+            />
+            <button type="submit" class="btn btn-error btn-sm">
+              Delete Selected ({selectedArticles.size})
+            </button>
+          </form>
+        {/if}
+      </div>
     </div>
 
     <table class="table table-zebra">
@@ -676,6 +770,23 @@
           <button class="btn btn-primary mt-4" onclick={saveArticle}
             >Save Article</button
           >
+          {#if error}
+            <div class="alert alert-error mt-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                /></svg
+              >
+              <span>{error}</span>
+            </div>
+          {/if}
         </div>
       {/if}
     </div>

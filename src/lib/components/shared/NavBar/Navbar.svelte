@@ -10,6 +10,8 @@
     () => currentPath === "/account/create_profile",
   )
 
+  let isAdmin = $derived.by(() => role?.toUpperCase() === "CSR")
+
   let menuItems = $derived.by(() => {
     console.log("Navbar - Current path:", currentPath)
     console.log("Navbar - Current role:", role, typeof role)
@@ -19,6 +21,17 @@
       return []
     }
 
+    // Different menu items based on role
+    if (isAdmin) {
+      // CSR only sees admin items and account
+      return [
+        { href: "/admin/draftOrder", label: "Draft Order" },
+        { href: "/admin/knowledge-base/new-article", label: "Knowledge Base" },
+        { href: "/account", label: "Account" },
+      ]
+    }
+
+    // Regular user menu items
     const baseItems = [
       { href: "/blog", label: "Blog" },
       { href: "/quote", label: "Quote" },
@@ -33,27 +46,35 @@
       })
     }
 
-    // Add Draft Order for CSR role (case-insensitive comparison)
-    if (role?.toUpperCase() === "CSR") {
-      console.log("Adding Draft Order menu item for CSR")
-      baseItems.splice(2, 0, { href: "/draftOrder", label: "Draft Order" })
-    }
-
-    console.log("Final menu items:", baseItems)
     return baseItems
   })
 </script>
 
-<div class="navbar bg-base-100 container mx-auto">
+<div class="navbar {isAdmin ? 'bg-base-300' : 'bg-base-100'} container mx-auto">
   <div class="flex-1">
-    <a class="btn btn-ghost normal-case text-xl" href="/">SaaS Starter</a>
+    <a class="btn btn-ghost normal-case text-xl" href="/">
+      {#if isAdmin}
+        <span class="text-primary">Admin</span> - SaaS Starter
+      {:else}
+        SaaS Starter
+      {/if}
+    </a>
   </div>
   <div class="flex-none">
     <!-- Only show navigation if not on create_profile -->
     {#if !hideAllNavigation}
       <ul class="menu menu-horizontal px-1 hidden sm:flex font-bold text-lg">
         {#each menuItems as item}
-          <li class="md:mx-2"><a href={item.href}>{item.label}</a></li>
+          <li class="md:mx-2">
+            <a
+              href={item.href}
+              class={isAdmin && item.href.startsWith("/admin")
+                ? "text-primary"
+                : ""}
+            >
+              {item.label}
+            </a>
+          </li>
         {/each}
 
         <li class="md:mx-0">
@@ -91,18 +112,23 @@
         </label>
         <ul
           tabindex="0"
-          class="menu menu-lg dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52 font-bold"
+          class="menu menu-lg dropdown-content mt-3 z-[1] p-2 shadow {isAdmin
+            ? 'bg-base-300'
+            : 'bg-base-100'} rounded-box w-52 font-bold"
         >
           {#each menuItems as item}
-            <li><a href={item.href}>{item.label}</a></li>
+            <li>
+              <a
+                href={item.href}
+                class={isAdmin && item.href.startsWith("/admin")
+                  ? "text-primary"
+                  : ""}
+              >
+                {item.label}
+              </a>
+            </li>
           {/each}
           <li><a href="/search">Search</a></li>
-          <li>
-            <a
-              href="https://github.com/CriticalMoments/CMSaasStarter"
-              class="border border-primary">★ us on Github</a
-            >
-          </li>
         </ul>
       </div>
     {/if}
