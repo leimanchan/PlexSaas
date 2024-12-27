@@ -1,7 +1,7 @@
 <script lang="ts">
   import { enhance } from "$app/forms"
   import { writable } from "svelte/store"
-  import { calculateShipping } from "$lib/shipping/shipping-calc"
+  import { calculateShipping } from "$lib/components/shared/shipping/shipping-calc"
 
   let { data, form } = $props()
   let apiResponse = writable("")

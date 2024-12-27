@@ -3,30 +3,102 @@
   import { enhance } from "$app/forms"
 
   let { data } = $props()
-  let articles = $state(data.articles || [])
 
   let currentArticle = $state({
-    title: "",
     content: [],
-    seo: {
-      keywords: null,
-      isEnabled: true,
-      description: null,
-      title: null,
-    },
-    permission: "ALL",
-    viewCount: "0",
-    likeCount: "0",
-    commentCount: "0",
-    attachmentCount: "0",
-    feedbackCount: "0",
+    title: "",
   })
+
+  let articles = $state(data?.articles || [])
+  let isLoading = $state(true)
+  let hasError = $state(false)
+  let debugInfo = $state(null)
 
   let selectedArticle = $state(null)
   let selectedArticles = $state(new Set())
 
   // Add error state
   let error = $state(null)
+
+  let showPreview = $state(false)
+
+  let isUploading = $state(false)
+  let imageUrl = $state(
+    "https://cqcnbvrnyoquwplayjap.supabase.co/storage/v1/object/public/KB-storage/knowledge-base/9a308367-b1ae-45ba-a81c-4369310b9bbf.jpg",
+  )
+
+  // Add these state variables
+  let linkEditor = $state({
+    show: false,
+    url: "https://",
+    position: { x: 0, y: 0 },
+    selection: null,
+    targetSection: null,
+    editableDiv: null,
+    range: null,
+    selectedText: "",
+  })
+
+  // Add effect to monitor state changes
+  $effect(() => {
+    console.log("Current articles:", articles)
+  })
+
+  // Update the initialization effect with better error handling
+  $effect(() => {
+    const initializeArticles = async () => {
+      console.group("Fetching Articles")
+      try {
+        const response = await fetch(
+          "/admin/knowledge-base/new-article?/getArticles",
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+          },
+        )
+
+        // Debug response information
+        debugInfo = {
+          status: response.status,
+          contentType: response.headers.get("content-type"),
+          url: response.url,
+        }
+        console.log("📥 Response debug info:", debugInfo)
+
+        // Check if response is ok and is JSON
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const contentType = response.headers.get("content-type")
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new TypeError("Expected JSON response but got " + contentType)
+        }
+
+        const result = await response.json()
+        console.log("🟪 Server response:", result)
+
+        if (result.type === "success") {
+          // Use immutable update pattern
+          articles = [...(result.data || [])]
+          console.log("✅ Articles loaded:", articles)
+        } else {
+          console.error("⚠️ Failed to load articles:", result)
+          hasError = true
+        }
+      } catch (error) {
+        console.error("❌ Error loading articles:", error)
+        hasError = true
+      } finally {
+        isLoading = false
+        console.groupEnd()
+      }
+    }
+
+    initializeArticles()
+  })
 
   function addContentSection(type) {
     const newSection = {
@@ -59,7 +131,8 @@
         newSection.src = ""
         newSection.alt = ""
         newSection.style = {
-          "max-width": "100%",
+          widthValue: 100,
+          width: "100%",
           margin: "1em 0",
         }
         break
@@ -271,6 +344,177 @@
       console.groupEnd()
     }
   }
+
+  // Add this function to handle file uploads
+  async function handleImageUpload(event, section) {
+    const file = event.target.files[0]
+    if (!file) {
+      console.log("❌ No file selected")
+      return
+    }
+
+    console.log("📁 File selected:", file.name)
+    console.log("📋 Initial section state:", section)
+
+    try {
+      const form = new FormData()
+      form.append("file", file)
+
+      console.log("🚀 Sending upload request...")
+      const response = await fetch("?/uploadImage", {
+        method: "POST",
+        body: form,
+      })
+
+      const result = await response.json()
+      console.log("📥 Raw server response:", result)
+
+      // Extract URL using regex since we can see it in the response
+      const imageUrl = result.data?.match(/https:\/\/[^"]+/)?.[0]
+      console.log("🔗 Extracted URL:", imageUrl)
+
+      if (imageUrl) {
+        // Create a new section object
+        const updatedSection = {
+          ...section,
+          src: imageUrl,
+          alt: file.name || "Uploaded image",
+          children: section.children || [],
+        }
+
+        console.log("📝 Updated section data:", updatedSection)
+
+        // Find the index of the current section
+        const index = currentArticle.content.findIndex((s) => s === section)
+        console.log("📍 Section index:", index)
+
+        if (index !== -1) {
+          // Create a new content array with the updated section
+          const newContent = [...currentArticle.content]
+          newContent[index] = updatedSection
+
+          // Update the state
+          currentArticle.content = newContent
+
+          console.log("✅ Content updated:", currentArticle.content)
+        } else {
+          console.error("❌ Could not find section in content array")
+        }
+      } else {
+        console.error("❌ No URL found in response:", result)
+      }
+    } catch (error) {
+      console.error("❌ Upload error:", error)
+    }
+  }
+
+  // Add an effect to monitor content changes
+  $effect(() => {
+    console.log("🔄 Content changed:", currentArticle.content)
+  })
+
+  function showLinkEditor(e, section) {
+    e.preventDefault() // Prevent losing focus
+
+    const selection = window.getSelection()
+    const selectedText = selection.toString()
+
+    if (!selectedText) {
+      console.log("⚠️ No text selected")
+      return
+    }
+
+    const range = selection.getRangeAt(0)
+    const rect = range.getBoundingClientRect()
+    const editableDiv = e.target.closest("[contenteditable]")
+
+    console.log("🎯 Opening link editor", {
+      selectedText,
+      section,
+      editableDiv,
+    })
+
+    // Store all the necessary information
+    linkEditor = {
+      show: true,
+      url: "https://",
+      position: {
+        x: rect.left + window.scrollX,
+        y: rect.bottom + window.scrollY + 5,
+      },
+      selection: selection,
+      targetSection: section,
+      editableDiv: editableDiv,
+      range: range.cloneRange(),
+      selectedText: selectedText,
+    }
+  }
+
+  function insertLink() {
+    console.log("🔗 Starting link insertion...", linkEditor)
+
+    if (
+      !linkEditor.url ||
+      !linkEditor.targetSection ||
+      !linkEditor.editableDiv ||
+      !linkEditor.selectedText
+    ) {
+      console.error("❌ Missing required data:", {
+        url: linkEditor.url,
+        hasSection: !!linkEditor.targetSection,
+        hasDiv: !!linkEditor.editableDiv,
+        selectedText: linkEditor.selectedText,
+      })
+      return
+    }
+
+    try {
+      // Create the link element
+      const linkElement = document.createElement("a")
+      linkElement.href = linkEditor.url
+      linkElement.textContent = linkEditor.selectedText
+      linkElement.target = "_blank"
+      linkElement.rel = "noopener noreferrer"
+
+      // Restore the selection
+      const selection = window.getSelection()
+      selection.removeAllRanges()
+      selection.addRange(linkEditor.range)
+
+      // Insert the link
+      const range = selection.getRangeAt(0)
+      range.deleteContents()
+      range.insertNode(linkElement)
+
+      // Update the state
+      const newSections = [...currentArticle.content]
+      const sectionIndex = newSections.indexOf(linkEditor.targetSection)
+
+      if (sectionIndex !== -1) {
+        newSections[sectionIndex] = {
+          ...linkEditor.targetSection,
+          children: [linkEditor.editableDiv.innerHTML],
+        }
+
+        currentArticle.content = newSections
+        console.log("✅ Link inserted successfully")
+      }
+    } catch (error) {
+      console.error("❌ Error inserting link:", error)
+    }
+
+    // Reset link editor
+    linkEditor = {
+      show: false,
+      url: "https://",
+      position: { x: 0, y: 0 },
+      selection: null,
+      targetSection: null,
+      editableDiv: null,
+      range: null,
+      selectedText: "",
+    }
+  }
 </script>
 
 <!-- Main Layout -->
@@ -310,78 +554,89 @@
       </div>
     </div>
 
-    <table class="table table-zebra">
-      <thead>
-        <tr>
-          <th class="w-12">
-            <label>
-              <input
-                type="checkbox"
-                class="checkbox"
-                onclick={(e) => {
-                  if (e.target.checked) {
-                    selectedArticles = new Set(articles)
-                  } else {
-                    selectedArticles.clear()
-                  }
-                }}
-              />
-            </label>
-          </th>
-          <th>Title</th>
-          <th>Views</th>
-          <th>Likes</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each articles as article}
-          <tr class="hover">
-            <td>
+    {#if isLoading}
+      <div class="text-center p-4">
+        <span class="loading loading-spinner loading-lg"></span>
+        <p>Loading articles...</p>
+      </div>
+    {:else if articles.length === 0}
+      <div class="text-center p-4">
+        <p>No articles found. Create your first article!</p>
+      </div>
+    {:else}
+      <table class="table table-zebra">
+        <thead>
+          <tr>
+            <th class="w-12">
               <label>
                 <input
                   type="checkbox"
                   class="checkbox"
-                  checked={selectedArticles.has(article)}
-                  onclick={() => toggleSelection(article)}
+                  onclick={(e) => {
+                    if (e.target.checked) {
+                      selectedArticles = new Set(articles)
+                    } else {
+                      selectedArticles.clear()
+                    }
+                  }}
                 />
               </label>
-            </td>
-            <td>
-              <div
-                class="font-bold cursor-pointer hover:text-primary"
-                onclick={() => viewArticle(article)}
-              >
-                {article.title}
-              </div>
-            </td>
-            <td>{article.viewCount}</td>
-            <td>{article.likeCount}</td>
-            <td>
-              <button
-                class="btn btn-ghost btn-xs"
-                onclick={() => deleteArticle(article)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
-            </td>
+            </th>
+            <th>Title</th>
+            <th>Views</th>
+            <th>Likes</th>
+            <th>Actions</th>
           </tr>
-        {/each}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {#each articles as article}
+            <tr class="hover">
+              <td>
+                <label>
+                  <input
+                    type="checkbox"
+                    class="checkbox"
+                    checked={selectedArticles.has(article)}
+                    onclick={() => toggleSelection(article)}
+                  />
+                </label>
+              </td>
+              <td>
+                <div
+                  class="font-bold cursor-pointer hover:text-primary"
+                  onclick={() => viewArticle(article)}
+                >
+                  {article.title}
+                </div>
+              </td>
+              <td>{article.viewCount}</td>
+              <td>{article.likeCount}</td>
+              <td>
+                <button
+                  class="btn btn-ghost btn-xs"
+                  onclick={() => deleteArticle(article)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    {/if}
   </div>
 
   <!-- Editor/Viewer Flexbox -->
@@ -411,19 +666,79 @@
                   {section.children[0]}
                 </h3>
               {:else if section.type === "paragraph"}
-                <p class="my-4 text-base-content">
-                  {#if section.children[0]?.type === "formatting"}
-                    <span
-                      style={Object.entries(section.children[0].style)
-                        .map(([k, v]) => `${k}:${v}`)
-                        .join(";")}
+                <div class="formatting-toolbar join gap-1 mb-2">
+                  <button
+                    class="btn btn-xs"
+                    onmousedown={(e) => {
+                      e.preventDefault() // Prevent losing focus
+                      document.execCommand("bold", false, null)
+                    }}
+                    title="Bold">B</button
+                  >
+                  <button
+                    class="btn btn-xs italic"
+                    onmousedown={(e) => {
+                      e.preventDefault() // Prevent losing focus
+                      document.execCommand("italic", false, null)
+                    }}
+                    title="Italic">I</button
+                  >
+                  <button
+                    class="btn btn-xs underline"
+                    onmousedown={(e) => {
+                      e.preventDefault() // Prevent losing focus
+                      document.execCommand("underline", false, null)
+                    }}
+                    title="Underline">U</button
+                  >
+                  <button
+                    class="btn btn-xs line-through"
+                    onmousedown={(e) => {
+                      e.preventDefault() // Prevent losing focus
+                      document.execCommand("strikeThrough", false, null)
+                    }}
+                    title="Strike Through">S</button
+                  >
+                  <button
+                    class="btn btn-xs"
+                    onmousedown={(e) => showLinkEditor(e, section)}
+                    title="Create Link"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      {section.children[0].children[0]}
-                    </span>
-                  {:else}
-                    {section.children[0]}
-                  {/if}
-                </p>
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <div
+                  contenteditable="true"
+                  class="min-h-[100px] p-2 border rounded prose max-w-none"
+                  data-section
+                  onblur={(e) => {
+                    if (!linkEditor.show) {
+                      // Create new array with updated section
+                      const newContent = [...currentArticle.content]
+                      const sectionIndex = newContent.indexOf(section)
+                      newContent[sectionIndex] = {
+                        ...section,
+                        children: [e.target.innerHTML],
+                      }
+                      currentArticle.content = newContent
+                    }
+                  }}
+                >
+                  {@html section.children[0]}
+                </div>
               {:else if section.type === "list"}
                 {#if section.ordered}
                   <ol class="list-decimal list-inside my-4">
@@ -440,18 +755,25 @@
                 {/if}
               {:else if section.type === "image"}
                 <div class="my-4">
-                  {#if section.src}
+                  <div class="image-container">
                     <img
                       src={section.src}
-                      alt={section.alt}
-                      class="max-w-full h-auto rounded-lg shadow-lg"
+                      alt={section.alt || ""}
+                      style={Object.entries(section.style || {})
+                        .map(([key, value]) => `${key}: ${value}`)
+                        .join(";")}
+                      class="rounded-lg shadow-lg mx-auto"
+                      onload={() =>
+                        console.log(
+                          "✅ Image loaded successfully:",
+                          section.src,
+                        )}
+                      onerror={(e) => {
+                        console.error("❌ Image failed to load:", section.src)
+                        console.log("📋 Section data:", section)
+                      }}
                     />
-                    {#if section.alt}
-                      <p class="text-sm text-base-content/70 mt-2 text-center">
-                        {section.alt}
-                      </p>
-                    {/if}
-                  {/if}
+                  </div>
                 </div>
               {:else if section.type === "code"}
                 <div class="my-4">
@@ -632,25 +954,75 @@
                   <div class="formatting-toolbar join gap-1 mb-2">
                     <button
                       class="btn btn-xs"
-                      onclick={() =>
-                        (section.children = [
-                          addFormatting(section.children[0], "bold"),
-                        ])}>B</button
+                      onmousedown={(e) => {
+                        e.preventDefault() // Prevent losing focus
+                        document.execCommand("bold", false, null)
+                      }}
+                      title="Bold">B</button
                     >
                     <button
                       class="btn btn-xs italic"
-                      onclick={() =>
-                        (section.children = [
-                          addFormatting(section.children[0], "italic"),
-                        ])}>I</button
+                      onmousedown={(e) => {
+                        e.preventDefault() // Prevent losing focus
+                        document.execCommand("italic", false, null)
+                      }}
+                      title="Italic">I</button
                     >
+                    <button
+                      class="btn btn-xs underline"
+                      onmousedown={(e) => {
+                        e.preventDefault() // Prevent losing focus
+                        document.execCommand("underline", false, null)
+                      }}
+                      title="Underline">U</button
+                    >
+                    <button
+                      class="btn btn-xs line-through"
+                      onmousedown={(e) => {
+                        e.preventDefault() // Prevent losing focus
+                        document.execCommand("strikeThrough", false, null)
+                      }}
+                      title="Strike Through">S</button
+                    >
+                    <button
+                      class="btn btn-xs"
+                      onmousedown={(e) => showLinkEditor(e, section)}
+                      title="Create Link"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                        />
+                      </svg>
+                    </button>
                   </div>
                   <div
                     contenteditable="true"
-                    class="min-h-[100px] p-2 border rounded"
-                    onblur={(e) => (section.children = [e.target.textContent])}
+                    class="min-h-[100px] p-2 border rounded prose max-w-none"
+                    data-section
+                    onblur={(e) => {
+                      if (!linkEditor.show) {
+                        // Create new array with updated section
+                        const newContent = [...currentArticle.content]
+                        const sectionIndex = newContent.indexOf(section)
+                        newContent[sectionIndex] = {
+                          ...section,
+                          children: [e.target.innerHTML],
+                        }
+                        currentArticle.content = newContent
+                      }
+                    }}
                   >
-                    {section.children[0]}
+                    {@html section.children[0]}
                   </div>
                 {:else if section.type === "list"}
                   <div class="flex items-center gap-2 mb-2">
@@ -699,26 +1071,75 @@
                     Add Item
                   </button>
                 {:else if section.type === "image"}
-                  <div class="flex flex-col gap-2">
-                    <input
-                      type="text"
-                      class="input input-bordered input-sm"
-                      placeholder="Image URL"
-                      bind:value={section.src}
-                    />
-                    <input
-                      type="text"
-                      class="input input-bordered input-sm"
-                      placeholder="Alt text"
-                      bind:value={section.alt}
-                    />
-                    {#if section.src}
-                      <img
-                        src={section.src}
-                        alt={section.alt}
-                        class="max-w-full h-auto"
+                  <div class="flex flex-col gap-4 p-4 border rounded-lg">
+                    <!-- Image controls with smoother slider -->
+                    <div class="flex flex-col gap-4">
+                      <div class="form-control w-full">
+                        <label class="label">
+                          <span class="label-text">Width (%)</span>
+                          <span class="label-text-alt"
+                            >{section.style.width}</span
+                          >
+                        </label>
+                        <input
+                          type="range"
+                          min="10"
+                          max="100"
+                          value={section.style.widthValue}
+                          class="range range-primary"
+                          step="1"
+                          oninput={(e) => {
+                            const value = Number(e.target.value)
+                            section.style = {
+                              ...section.style,
+                              widthValue: value,
+                              width: `${value}%`,
+                            }
+                          }}
+                        />
+                        <div
+                          class="w-full flex justify-between text-xs px-2 mt-1"
+                        >
+                          <span>10%</span>
+                          <span>50%</span>
+                          <span>100%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Image upload -->
+                    <div
+                      class="flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-lg bg-base-200"
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        class="file-input file-input-bordered w-full max-w-xs"
+                        onchange={(e) => handleImageUpload(e, section)}
                       />
-                    {/if}
+                      {#if section.src}
+                        <p class="text-sm text-success mt-2">
+                          ✓ Image uploaded
+                        </p>
+                      {:else}
+                        <p class="text-sm text-base-content/70 mt-2">
+                          Upload an image from your computer
+                        </p>
+                      {/if}
+                    </div>
+
+                    <!-- Alt text input -->
+                    <div class="form-control w-full">
+                      <label class="label">
+                        <span class="label-text">Alt Text</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Describe the image for accessibility"
+                        class="input input-bordered input-sm w-full"
+                        bind:value={section.alt}
+                      />
+                    </div>
                   </div>
                 {:else if section.type === "code"}
                   <div class="flex flex-col gap-2">
@@ -808,19 +1229,9 @@
                 {section.children[0]}
               </h3>
             {:else if section.type === "paragraph"}
-              <p class="my-4 text-base-content">
-                {#if section.children[0]?.type === "formatting"}
-                  <span
-                    style={Object.entries(section.children[0].style)
-                      .map(([k, v]) => `${k}:${v}`)
-                      .join(";")}
-                  >
-                    {section.children[0].children[0]}
-                  </span>
-                {:else}
-                  {section.children[0]}
-                {/if}
-              </p>
+              <div class="my-4 text-base-content prose max-w-none">
+                {@html section.children[0]}
+              </div>
             {:else if section.type === "list"}
               {#if section.ordered}
                 <ol class="list-decimal list-inside my-4">
@@ -835,20 +1246,18 @@
                   {/each}
                 </ul>
               {/if}
-            {:else if section.type === "image"}
+            {:else if section.type === "image" && section.src}
               <div class="my-4">
-                {#if section.src}
+                <div class="image-container">
                   <img
                     src={section.src}
-                    alt={section.alt}
-                    class="max-w-full h-auto rounded-lg shadow-lg"
+                    alt={section.alt || ""}
+                    style={Object.entries(section.style || {})
+                      .map(([k, v]) => `${k}:${v}`)
+                      .join(";")}
+                    class="rounded-lg shadow-lg mx-auto"
                   />
-                  {#if section.alt}
-                    <p class="text-sm text-base-content/70 mt-2 text-center">
-                      {section.alt}
-                    </p>
-                  {/if}
-                {/if}
+                </div>
               </div>
             {:else if section.type === "code"}
               <div class="my-4">
@@ -888,6 +1297,26 @@
   </div>
 </div>
 
+<!-- Add loading indicator -->
+{#if isUploading}
+  <div class="loading-indicator" role="status">
+    <span class="loading loading-spinner"></span>
+    <span>Uploading image...</span>
+  </div>
+{/if}
+
+<!-- Add the link editor popup -->
+{#if linkEditor.show}
+  <div
+    class="link-editor"
+    style="position: fixed; left: {linkEditor.position.x}px; top: {linkEditor
+      .position.y}px;"
+  >
+    <input type="text" bind:value={linkEditor.url} placeholder="Enter URL..." />
+    <button onclick={insertLink}>Add</button>
+  </div>
+{/if}
+
 <style>
   .content-editor {
     max-height: calc(100vh - 300px);
@@ -904,5 +1333,54 @@
   .article-content {
     max-width: 800px;
     margin: 0 auto;
+  }
+
+  .image-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    min-height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .loading-placeholder {
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .error-message {
+    padding: 2rem;
+    text-align: center;
+    color: red;
+  }
+
+  .formatting-toolbar button {
+    min-width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .formatting-toolbar button:hover {
+    background-color: hsl(var(--b2));
+  }
+
+  /* Style links in the editor */
+  [contenteditable] a {
+    color: hsl(var(--p));
+    text-decoration: underline;
+  }
+
+  .link-editor {
+    z-index: 100;
+    position: fixed;
+  }
+
+  /* Prevent blur when clicking link editor */
+  .link-editor * {
+    pointer-events: auto;
   }
 </style>

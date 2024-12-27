@@ -123,5 +123,58 @@ export const actions = {
         error: error.message
       };
     }
+  },
+
+  uploadImage: async ({ request, locals }) => {
+    try {
+      const formData = await request.formData()
+      const file = formData.get('file') as File
+      if (!file) throw new Error('No file uploaded')
+
+      console.group('Server Upload Process')
+      console.log('📝 Received file:', file.name)
+
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${crypto.randomUUID()}.${fileExt}`
+      const filePath = `knowledge-base/${fileName}`
+
+      console.log('🗂️ File path:', filePath)
+
+      // Store the upload response
+      const uploadResponse = await locals.supabase.storage
+        .from('KB-storage')
+        .upload(filePath, file)
+
+      if (uploadResponse.error) throw uploadResponse.error
+
+      // Get public URL and store full response
+      const urlResponse = locals.supabase.storage
+        .from('KB-storage')
+        .getPublicUrl(filePath)
+
+      console.log('🔍 Full Supabase upload response:', uploadResponse)
+      console.log('🔍 Full URL response:', urlResponse)
+
+      // Return all the data for debugging
+      return {
+        success: true,
+        debug: {
+          uploadResponse,
+          urlResponse,
+          filePath,
+          fileName
+        },
+        imageUrl: urlResponse.data.publicUrl
+      }
+    } catch (error) {
+      console.error('❌ Server error:', error)
+      return {
+        success: false,
+        error: error.message,
+        debug: { error }
+      }
+    } finally {
+      console.groupEnd()
+    }
   }
 } satisfies Actions;
